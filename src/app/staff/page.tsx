@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LogOut, Coffee, Sparkles } from "lucide-react";
+import { LogOut, Coffee, Sparkles, Car, Phone } from "lucide-react";
 import { staffOrderSummary } from "@/ai/flows/staff-order-summary";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -22,7 +22,6 @@ export default function StaffDashboard() {
   const { toast } = useToast();
   const [isStaff, setIsStaff] = useState<boolean | null>(null);
   
-  // استخدام useMemo لتثبيت المرجع ومنع حلقات التحديث اللانهائية
   const ordersQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, "orders"), orderBy("createdAt", "desc"));
@@ -49,7 +48,6 @@ export default function StaffDashboard() {
           router.push("/menu");
         }
       } catch (e) {
-        console.error("Error checking role:", e);
         setIsStaff(false);
         router.push("/menu");
       }
@@ -116,13 +114,13 @@ export default function StaffDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f3f0ea]">
-      <header className="bg-primary text-white p-4 sticky top-0 z-50">
+      <header className="bg-primary text-white p-4 sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Coffee className="h-6 w-6 text-accent" />
-            <h1 className="text-xl font-headline font-bold">Diamond | لوحة الموظفين</h1>
+            <h1 className="text-xl font-headline font-bold">Diamond | لوحة التحكم</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => router.push("/")} className="text-white">
+          <Button variant="ghost" size="sm" onClick={() => router.push("/")} className="text-white hover:bg-white/10">
             <LogOut className="ml-2 h-4 w-4" /> خروج
           </Button>
         </div>
@@ -130,59 +128,77 @@ export default function StaffDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-6">
-          <h2 className="text-3xl font-headline font-bold text-primary">الطلبات الحالية</h2>
+          <div className="flex justify-between items-end">
+            <h2 className="text-3xl font-headline font-bold text-primary">الطلبات الحالية</h2>
+            <Badge className="bg-primary px-4 py-1 text-sm">{ordersData?.length || 0} طلب</Badge>
+          </div>
 
-          <Card className="border-none shadow-xl overflow-hidden rounded-[2rem]">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
-                  <TableHead className="text-right">العميل</TableHead>
-                  <TableHead className="text-right">الحالة</TableHead>
-                  <TableHead className="text-right">الذكاء الاصطناعي</TableHead>
-                  <TableHead className="text-center">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="bg-white">
-                {ordersLoading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-10">جاري تحميل الطلبات...</TableCell></TableRow>
-                ) : !ordersData || ordersData.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground">لا توجد طلبات حالياً.</TableCell></TableRow>
-                ) : (
-                  ordersData.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-bold">{order.customerName}</span>
-                          <span className="text-xs text-muted-foreground">{order.customerPhoneNumber}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ordersLoading ? (
+               <div className="col-span-full text-center py-20">جاري تحميل الطلبات...</div>
+            ) : !ordersData || ordersData.length === 0 ? (
+               <div className="col-span-full text-center py-20 text-muted-foreground">لا توجد طلبات نشطة.</div>
+            ) : (
+              ordersData.map((order) => (
+                <Card key={order.id} className="border-none shadow-xl rounded-[2rem] overflow-hidden bg-white">
+                  <div className="p-6 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-bold text-primary">{order.customerName}</h3>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <Phone className="h-3 w-3" /> {order.customerPhoneNumber}
+                        </p>
+                      </div>
+                      {getStatusBadge(order.status)}
+                    </div>
+
+                    <div className="bg-muted/30 p-4 rounded-2xl space-y-2">
+                      <p className="text-sm font-bold flex items-center gap-2">
+                        <Car className="h-4 w-4 text-accent" /> {order.carType}
+                      </p>
+                      <p className="text-xs bg-white inline-block px-2 py-1 rounded-md border border-black/5 font-code">
+                        لوحة: {order.carLicensePlate}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-sm">
+                          <span>{item.quantity}x {item.name}</span>
+                          <span className="font-bold">{item.price * item.quantity} ر.س</span>
                         </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" onClick={() => generateSummary(order)}>
-                              <Sparkles className="h-4 w-4 text-accent" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader><DialogTitle>ملخص الطلب الذكي</DialogTitle></DialogHeader>
-                            <div className="p-4 bg-muted/30 rounded-lg text-sm leading-relaxed">
-                              {loadingAi[order.id] ? "جاري التفكير..." : aiSummaries[order.id] || "اضغط على الأيقونة للتوليد"}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button variant="outline" size="sm" onClick={() => handleStatusChange(order.id, order.status)} className="rounded-full">
-                          تحديث الحالة
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </Card>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      <span className="text-xs text-muted-foreground">الإجمالي:</span>
+                      <span className="text-lg font-black text-primary">{order.totalPrice} ر.س</span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="flex-1 rounded-full h-11" onClick={() => generateSummary(order)}>
+                            <Sparkles className="h-4 w-4 ml-2 text-accent" /> تلخيص ذكي
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="rounded-[2rem]">
+                          <DialogHeader><DialogTitle>ملخص الطلب الذكي</DialogTitle></DialogHeader>
+                          <div className="p-4 bg-muted/30 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap">
+                            {loadingAi[order.id] ? "جاري التحليل بالذكاء الاصطناعي..." : aiSummaries[order.id] || "لا يوجد ملخص"}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <Button className="flex-1 bg-accent hover:bg-accent/90 rounded-full h-11" onClick={() => handleStatusChange(order.id, order.status)}>
+                        تحديث الحالة
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </main>
     </div>

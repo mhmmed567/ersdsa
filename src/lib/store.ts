@@ -21,6 +21,7 @@ export interface Order {
   customerName: string;
   customerPhoneNumber?: string;
   carLicensePlate?: string;
+  carType?: string;
   items: CartItem[];
   totalPrice: number;
   specialRequests?: string;
