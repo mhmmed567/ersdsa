@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Lock, Mail, UserPlus, ArrowLeft } from "lucide-react";
+import { Lock, Mail, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
@@ -28,7 +28,6 @@ export default function LoginPage() {
     if (!auth || !db) return;
     
     setLoading(true);
-    // تنظيف البيانات من المسافات الزائدة
     const cleanEmail = email.trim();
     const cleanPassword = password.trim();
 
@@ -36,7 +35,6 @@ export default function LoginPage() {
       const result = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const user = result.user;
 
-      // جلب بيانات المستخدم للتأكد من الصلاحيات
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
@@ -68,8 +66,6 @@ export default function LoginPage() {
       
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         errorMessage = "البيانات المدخلة غير صحيحة، يرجى المحاولة مرة أخرى.";
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "محاولات كثيرة خاطئة. يرجى الانتظار قليلاً ثم المحاولة.";
       }
 
       toast({
@@ -88,7 +84,7 @@ export default function LoginPage() {
         <CardHeader className="bg-[#432419] text-white p-8 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/30 to-transparent" />
           <div className="flex justify-center mb-4 relative z-10">
-            <div className="relative w-20 h-20 transition-transform hover:scale-105">
+            <div className="relative w-20 h-20">
               <Image 
                 src="https://i.postimg.cc/zfhr8CtC/65774426-19fd-4c21-892e-81dba55d501b-removebg-preview.png"
                 alt="Diamond Logo"
@@ -97,8 +93,8 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-xl font-headline font-black relative z-10 text-white">دخول المسؤولين</CardTitle>
-          <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest">Diamond Administration</p>
+          <CardTitle className="text-xl font-headline font-black relative z-10 text-white text-center">دخول المسؤولين</CardTitle>
+          <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest text-center">Diamond Administration</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-5">
@@ -141,14 +137,6 @@ export default function LoginPage() {
             </Button>
             
             <div className="flex flex-col gap-3 pt-2">
-              <Button 
-                variant="outline" 
-                type="button"
-                onClick={() => router.push("/register-staff")}
-                className="w-full text-[#432419] border-[#432419]/10 h-11 rounded-xl font-bold text-xs"
-              >
-                <UserPlus className="ml-2 h-3.5 w-3.5" /> إنشاء حساب مسؤول جديد
-              </Button>
               <Button 
                 variant="ghost" 
                 type="button"
