@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Phone, Lock, User } from "lucide-react";
+import { UserPlus, Phone, Lock, User, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -58,7 +58,6 @@ export default function RegisterStaffPage() {
         createdAt: Date.now()
       };
 
-      // استخدام النمط الصحيح للكتابة مع معالجة أخطاء الصلاحيات
       setDoc(userRef, userData)
         .catch(async (error) => {
           const permissionError = new FirestorePermissionError({
@@ -71,15 +70,26 @@ export default function RegisterStaffPage() {
 
       toast({
         title: "تم التسجيل بنجاح",
-        description: "تم إنشاء حساب الموظف وتفعيله بنجاح.",
+        description: "أهلاً بك في فريق دايموند، تم إنشاء حسابك بنجاح.",
       });
       
       router.push("/staff");
     } catch (error: any) {
       console.error("Registration Error:", error);
+      
+      let errorMessage = "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.";
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "رقم الجوال هذا مسجل مسبقاً. يرجى تسجيل الدخول أو استخدام رقم آخر.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "كلمة المرور ضعيفة جداً، يرجى استخدام 6 أحرف على الأقل.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "خدمة التسجيل معطلة حالياً، يرجى التأكد من تفعيل Email/Password في Firebase.";
+      }
+
       toast({
         title: "خطأ في التسجيل",
-        description: error.message || "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -102,7 +112,7 @@ export default function RegisterStaffPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline font-black relative z-10">تسجيل مسؤول</CardTitle>
+          <CardTitle className="text-3xl font-headline font-black relative z-10">انضمام للفريق</CardTitle>
           <p className="text-white/70 mt-2 font-medium relative z-10">إضافة عضو جديد لعائلة Diamond</p>
         </CardHeader>
         <CardContent className="p-10">
@@ -168,7 +178,7 @@ export default function RegisterStaffPage() {
               disabled={loading}
               className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl mt-6 active:scale-95"
             >
-              {loading ? "جاري المعالجة..." : "إنشاء حساب المسؤول"}
+              {loading ? "جاري المعالجة..." : "تفعيل حساب الموظف"}
             </Button>
             
             <Button 
@@ -177,7 +187,7 @@ export default function RegisterStaffPage() {
               onClick={() => router.push("/login")}
               className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl"
             >
-              لديك حساب بالفعل؟ سجل دخولك
+              هل تملك حساباً؟ سجل دخولك من هنا
             </Button>
           </form>
         </CardContent>
