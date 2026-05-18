@@ -49,7 +49,7 @@ const MENU_ITEMS: MenuItem[] = [
     price: 20,
     category: "مشروبات باردة",
     description: "انتعاش القهوة مع الحليب المكثف والثلج.",
-    image: PlaceHolderImages.find(img => img.id hunted => 'herbal-tea')?.imageUrl || "https://picsum.photos/seed/ice/600/400",
+    image: PlaceHolderImages.find(img => img.id === 'herbal-tea')?.imageUrl || "https://picsum.photos/seed/ice/600/400",
   }
 ];
 
