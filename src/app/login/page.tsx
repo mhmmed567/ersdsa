@@ -28,10 +28,15 @@ export default function LoginPage() {
     if (!auth || !db) return;
     
     setLoading(true);
+    // تنظيف البيانات من المسافات الزائدة
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const user = result.user;
 
+      // جلب بيانات المستخدم للتأكد من الصلاحيات
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
@@ -40,7 +45,7 @@ export default function LoginPage() {
         if (userData.role === "staff") {
           toast({
             title: "مرحباً بك مجدداً",
-            description: `أهلاً بك يا ${userData.displayName || "المسؤول"}. تم الدخول بصلاحيات الإدارة.`,
+            description: `أهلاً بك يا ${userData.displayName || "المسؤول"}.`,
           });
           router.push("/staff");
         } else {
@@ -53,17 +58,18 @@ export default function LoginPage() {
       } else {
         toast({
           title: "تنبيه",
-          description: "تم تسجيل الدخول ولكن لم يتم العثور على بياناتك في قاعدة البيانات.",
+          description: "تم تسجيل الدخول، ولكن لم يتم العثور على صلاحياتك. يرجى مراجعة الإدارة.",
           variant: "destructive"
         });
       }
     } catch (error: any) {
+      console.error("Login error:", error);
       let errorMessage = "يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
       
-      if (error.code === 'auth/invalid-credential') {
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         errorMessage = "البيانات المدخلة غير صحيحة، يرجى المحاولة مرة أخرى.";
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "محاولات كثيرة خاطئة. يرجى المحاولة لاحقاً.";
+        errorMessage = "محاولات كثيرة خاطئة. يرجى الانتظار قليلاً ثم المحاولة.";
       }
 
       toast({

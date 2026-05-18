@@ -34,24 +34,36 @@ export default function RegisterStaffPage() {
     if (!auth || !db) return;
     
     setLoading(true);
+    const cleanEmail = formData.email.trim();
+    const cleanPassword = formData.password.trim();
+
     try {
       // 1. إنشاء الحساب في Firebase Auth
-      const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const result = await createUserWithEmailAndPassword(auth, cleanEmail, cleanPassword);
       const user = result.user;
 
-      // 2. تجهيز بيانات المستخدم مع الصلاحية المطلوبة
+      // 2. تجهيز بيانات المستخدم مع الصلاحية
       const userRef = doc(db, "users", user.uid);
       const userData = {
         uid: user.uid,
-        email: formData.email,
-        displayName: formData.displayName,
-        role: "staff", // تعيين صلاحية المسؤول بشكل صريح
+        email: cleanEmail,
+        displayName: formData.displayName.trim(),
+        role: "staff", 
         createdAt: Date.now()
       };
 
-      // 3. استخدام await لضمان الحفظ في Firestore قبل الانتقال
-      await setDoc(userRef, userData).catch((err) => {
-        // إذا فشل Firestore، نرسل خطأ مخصص للتعامل معه
+      // 3. الحفظ في Firestore مع ضمان اكتمال العملية
+      try {
+        await setDoc(userRef, userData);
+        
+        toast({
+          title: "تم إنشاء الحساب بنجاح",
+          description: `مرحباً بك يا ${formData.displayName}. تم منحك صلاحيات المسؤول.`,
+        });
+        
+        router.push("/staff");
+      } catch (err: any) {
+        // في حال فشل Firestore، نرسل الخطأ للمتتبع
         const permissionError = new FirestorePermissionError({
           path: userRef.path,
           operation: 'create',
@@ -59,15 +71,8 @@ export default function RegisterStaffPage() {
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
         throw err;
-      });
+      }
 
-      toast({
-        title: "تم إنشاء الحساب بنجاح",
-        description: `مرحباً بك يا ${formData.displayName}. لقد تم منحك صلاحيات المسؤول.`,
-      });
-      
-      // التوجه للوحة التحكم بعد التأكد من الحفظ
-      router.push("/staff");
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.";
@@ -76,8 +81,8 @@ export default function RegisterStaffPage() {
         errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً.";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
-      } else if (error.message.includes('permission')) {
-        errorMessage = "خطأ في تصاريح قاعدة البيانات، يرجى التحقق من قواعد الأمان.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "البريد الإلكتروني غير صحيح.";
       }
 
       toast({
@@ -157,7 +162,7 @@ export default function RegisterStaffPage() {
               disabled={loading}
               className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl mt-6 active:scale-95"
             >
-              {loading ? "جاري إنشاء الحساب وحفظ الصلاحيات..." : "إنشاء حساب المسؤول"}
+              {loading ? "جاري إنشاء الحساب..." : "إنشاء حساب المسؤول"}
             </Button>
             
             <div className="flex flex-col gap-2 pt-2">
