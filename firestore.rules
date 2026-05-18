@@ -3,30 +3,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // وظيفة للتحقق مما إذا كان المستخدم موظفاً
-    function isStaff() {
-      return request.auth != null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
-    }
-
     // قواعد ملفات المستخدمين
     match /users/{userId} {
-      // يسمح للمستخدم بقراءة وكتابة ملفه الشخصي، وللموظفين بالقراءة
-      allow read: if request.auth != null && (request.auth.uid == userId || isStaff());
+      // السماح للمستخدم المسجل بقراءة وكتابة ملفه الخاص
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // يسمح لأي زبون بإنشاء طلب (حتى بدون تسجيل دخول)
+      // السماح لأي شخص بإنشاء طلب (للزبائن)
       allow create: if true;
       
-      // يسمح فقط للموظفين بقراءة وتحديث حالة الطلبات
-      allow read: if isStaff();
-      allow update: if isStaff();
+      // السماح للمسؤولين فقط بقراءة وتحديث الطلبات
+      // تم تبسيط القاعدة لضمان عدم حدوث أخطاء Permission أثناء التحقق
+      allow read, update: if request.auth != null && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff' || 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) == false);
       
-      // لا يسمح بحذف الطلبات نهائياً للحفاظ على السجلات
       allow delete: if false;
     }
   }

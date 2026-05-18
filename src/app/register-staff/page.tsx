@@ -45,32 +45,21 @@ export default function RegisterStaffPage() {
         uid: user.uid,
         email: formData.email,
         displayName: formData.displayName,
-        role: "staff", // منح صلاحية المسؤول تلقائياً
+        role: "staff", // منح صلاحية المسؤول تلقائياً كما طلبت
         createdAt: Date.now()
       };
 
-      // 3. حفظ البيانات في Firestore
-      await setDoc(userRef, userData)
-        .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: userData,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-          throw error;
-        });
+      // 3. حفظ البيانات في Firestore قبل التوجيه
+      await setDoc(userRef, userData);
 
       toast({
         title: "تم التسجيل بنجاح",
-        description: "أهلاً بك في فريق دايموند كمسؤول نظام. تم منحك الصلاحيات الكاملة.",
+        description: "أهلاً بك في فريق دايموند. تم منحك صلاحيات المسؤول كاملة.",
       });
       
       // التوجه مباشرة للوحة التحكم
       router.push("/staff");
     } catch (error: any) {
-      console.error("Registration Error:", error);
-      
       let errorMessage = "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.";
       
       if (error.code === 'auth/email-already-in-use') {
@@ -78,7 +67,7 @@ export default function RegisterStaffPage() {
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "كلمة المرور ضعيفة جداً، يرجى استخدام 6 أحرف على الأقل.";
       } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "خدمة التسجيل بالبريد معطلة في إعدادات Firebase.";
+        errorMessage = "يرجى تفعيل خيار Email/Password من لوحة تحكم Firebase.";
       }
 
       toast({
@@ -86,6 +75,15 @@ export default function RegisterStaffPage() {
         description: errorMessage,
         variant: "destructive"
       });
+      
+      // إذا حدث خطأ في Firestore ولكن تم إنشاء الحساب في Auth
+      if (error.name === 'FirestorePermissionError' || error.message.includes('permission')) {
+        const permissionError = new FirestorePermissionError({
+          path: `users/${auth.currentUser?.uid}`,
+          operation: 'create',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      }
     } finally {
       setLoading(false);
     }
