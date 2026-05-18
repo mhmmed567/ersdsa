@@ -7,25 +7,41 @@ import { getAuth, Auth } from 'firebase/auth';
 import { firebaseConfig } from './config';
 import { useMemo } from 'react';
 
-let memoApp: FirebaseApp | undefined;
-let memoFirestore: Firestore | undefined;
-let memoAuth: Auth | undefined;
+// Singletons for Firebase services to prevent re-initialization errors
+let cachedApp: FirebaseApp | undefined;
+let cachedFirestore: Firestore | undefined;
+let cachedAuth: Auth | undefined;
 
+/**
+ * Robust Firebase initialization for Next.js.
+ * Ensures that services are initialized only once and only on the client.
+ */
 export function initializeFirebase() {
   if (typeof window === 'undefined') {
     return { firebaseApp: null, firestore: null, auth: null };
   }
 
-  if (!memoApp) {
-    memoApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    memoFirestore = getFirestore(memoApp);
-    memoAuth = getAuth(memoApp);
+  if (!cachedApp) {
+    try {
+      cachedApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+      cachedFirestore = getFirestore(cachedApp);
+      cachedAuth = getAuth(cachedApp);
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      // Fallback if app is already initialized but not cached
+      const app = getApp();
+      return { 
+        firebaseApp: app, 
+        firestore: getFirestore(app), 
+        auth: getAuth(app) 
+      };
+    }
   }
 
   return { 
-    firebaseApp: memoApp as FirebaseApp, 
-    firestore: memoFirestore as Firestore, 
-    auth: memoAuth as Auth 
+    firebaseApp: cachedApp as FirebaseApp, 
+    firestore: cachedFirestore as Firestore, 
+    auth: cachedAuth as Auth 
   };
 }
 
