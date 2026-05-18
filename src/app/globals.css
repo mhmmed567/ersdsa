@@ -5,14 +5,14 @@
 
 @layer base {
   :root {
-    /* Diamond Identity Palette */
-    --brand-dark-brown: 17 47% 18%;    /* #432419 */
-    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
-    --brand-copper: 24 58% 59%;        /* #D48A5A */
-    --brand-cream: 37 47% 91%;         /* #F2E8D9 */
-    --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
+    /* الألوان المستخرجة بدقة من شعار دايموند المرفق */
+    --brand-dark-brown: 17 47% 18%;    /* #432419 - أغمق درجة في الشعار */
+    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E - لون القهوة المتوسط */
+    --brand-copper: 24 58% 59%;        /* #D48A5A - لون الخط المتوهج */
+    --brand-cream: 37 47% 91%;         /* #F2E8D9 - خلفية دافئة متناسقة */
+    --brand-charcoal: 0 0% 11%;        /* #1C1C1C - للتفاصيل السوداء */
 
-    --background: 37 47% 91%;          /* Soft Cream */
+    --background: 37 47% 91%;          /* الكريمي الدافئ */
     --foreground: var(--brand-dark-brown);
     
     --card: 0 0% 100%;
