@@ -17,7 +17,7 @@ export default function BottomNav() {
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50">
-      <div className="bg-white/80 backdrop-blur-2xl rounded-full shadow-[0_15px_40px_rgba(42,24,16,0.15)] border border-white/30 p-2 flex items-center justify-between">
+      <div className="bg-[#432419]/90 backdrop-blur-2xl rounded-full shadow-[0_15px_40px_rgba(67,36,25,0.25)] border border-white/10 p-2 flex items-center justify-between">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -25,20 +25,20 @@ export default function BottomNav() {
               key={item.href} 
               href={item.href}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-full transition-all duration-500 relative ${
-                isActive ? "bg-[#2a1810] text-[#faf7f2] shadow-xl scale-105" : "text-[#5c3a28] hover:bg-[#faf7f2]"
+                isActive ? "bg-[#D48A5A] text-[#F2E8D9] shadow-xl" : "text-[#F2E8D9]/60 hover:text-[#F2E8D9]"
               }`}
             >
               <div className="relative">
-                <item.icon className={`h-5 w-5 ${isActive ? "text-[#d4a373]" : ""}`} />
+                <item.icon className={`h-5 w-5 ${isActive ? "text-white" : ""}`} />
                 {!isActive && item.count !== undefined && item.count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#c07446] text-white text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold border border-white">
+                  <span className="absolute -top-2 -right-2 bg-[#D48A5A] text-white text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold border border-[#432419]">
                     {item.count}
                   </span>
                 )}
               </div>
               <span className="text-[13px] font-bold">{item.name}</span>
               {isActive && item.count !== undefined && item.count > 0 && (
-                <span className="bg-[#c07446] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                <span className="bg-[#432419] text-[#F2E8D9] text-[10px] px-2 py-0.5 rounded-full font-bold">
                   {item.count}
                 </span>
               )}

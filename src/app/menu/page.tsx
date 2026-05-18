@@ -3,7 +3,6 @@
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -13,7 +12,7 @@ import BottomNav from "@/components/layout/BottomNav";
 const MENU_ITEMS: MenuItem[] = [
   {
     id: "1",
-    name: "v60",
+    name: "v60 قهوة مختصة",
     price: 18,
     category: "قهوة مختصة",
     description: "قهوة مختصة محضرة بعناية فائقة لاستخراج أفضل النكهات.",
@@ -21,7 +20,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "2",
-    name: "كابتشينو",
+    name: "كابتشينو فاخر",
     price: 15,
     category: "قهوة مختصة",
     description: "إسبريسو مع حليب مبخر ورغوة كثيفة.",
@@ -29,7 +28,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "3",
-    name: "كرواسون سادة",
+    name: "كرواسون فرنسي",
     price: 12,
     category: "حلويات فاخرة",
     description: "كرواسون فرنسي هش بالزبدة.",
@@ -37,7 +36,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "4",
-    name: "آيس لاتيه",
+    name: "آيس لاتيه منعش",
     price: 18,
     category: "مشروبات باردة",
     description: "قهوة باردة منعشة مع الحليب.",
@@ -45,7 +44,7 @@ const MENU_ITEMS: MenuItem[] = [
   }
 ];
 
-const CATEGORIES = ["الكل", "قهوة مختصة", "مشروبات باردة", "حلويات فاخرة", "إضافات"];
+const CATEGORIES = ["الكل", "قهوة مختصة", "مشروبات باردة", "حلويات فاخرة"];
 
 export default function MenuPage() {
   const { addToCart } = useStore();
@@ -56,7 +55,7 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] pb-32">
+    <div className="min-h-screen bg-[#F2E8D9] pb-32">
       <Navbar />
       
       <main className="container mx-auto px-4 mt-6">
@@ -68,8 +67,8 @@ export default function MenuPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                 selectedCategory === cat 
-                  ? "bg-[#2a1810] text-[#faf7f2] shadow-xl shadow-[#2a1810]/20 scale-105" 
-                  : "bg-white/50 text-[#5c3a28] border border-[#2a1810]/5 hover:bg-white"
+                  ? "bg-[#432419] text-[#F2E8D9] shadow-lg shadow-[#432419]/20 scale-105" 
+                  : "bg-white/50 text-[#8B4E2E] border border-[#432419]/10 hover:bg-white"
               }`}
             >
               {cat}
@@ -77,10 +76,10 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Grid of Products - 2 columns on mobile */}
+        {/* Grid of Products */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
           {filteredItems.map((item) => (
-            <div key={item.id} className="luxury-card group stagger-1 animate-scale-in">
+            <div key={item.id} className="luxury-card group">
               <div className="relative aspect-square w-full p-2.5">
                 <div className="relative w-full h-full rounded-[2rem] overflow-hidden">
                   <Image
@@ -89,22 +88,20 @@ export default function MenuPage() {
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 768px) 50vw, 25vw"
-                    data-ai-hint="coffee cup"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2a1810]/60 to-transparent" />
-                  <div className="absolute top-3 left-3 bg-[#c07446] text-white font-bold rounded-full px-3 py-1 text-[11px] shadow-lg border border-white/20">
+                  <div className="absolute top-3 left-3 bg-[#D48A5A] text-white font-bold rounded-full px-3 py-1 text-[11px] shadow-lg">
                     {item.price} ر.س
                   </div>
                 </div>
               </div>
               
               <div className="px-4 pb-4 pt-1 text-right">
-                <span className="text-[#c07446] text-[10px] font-bold uppercase tracking-widest">{item.category}</span>
-                <h3 className="text-[14px] font-bold text-[#2a1810] mb-4 truncate font-luxury">{item.name}</h3>
+                <span className="text-[#D48A5A] text-[10px] font-bold uppercase tracking-widest">{item.category}</span>
+                <h3 className="text-[14px] font-bold text-[#432419] mb-4 truncate">{item.name}</h3>
                 
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full bg-[#2a1810] hover:bg-[#5c3a28] text-[#faf7f2] rounded-full h-10 flex items-center justify-center gap-2 text-[11px] font-bold transition-all shadow-md active:scale-95"
+                  className="w-full bg-[#432419] hover:bg-[#8B4E2E] text-[#F2E8D9] rounded-full h-10 flex items-center justify-center gap-2 text-[11px] font-bold transition-all"
                 >
                   أضف للسلة
                   <Plus className="h-4 w-4" />

@@ -4,59 +4,76 @@
 
 @layer base {
   :root {
-    --background: 38 25% 97%; /* #faf7f2 */
-    --foreground: 20 20% 10%; /* #2a1810 */
+    /* Diamond Brand Colors Palette */
+    --brand-dark-brown: 17 47% 18%;    /* #432419 */
+    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
+    --brand-copper: 24 58% 59%;        /* #D48A5A */
+    --brand-cream: 37 47% 91%;         /* #F2E8D9 */
+    --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
+
+    --background: var(--brand-cream);
+    --foreground: var(--brand-dark-brown);
+    
     --card: 0 0% 100%;
-    --card-foreground: 20 20% 10%;
+    --card-foreground: var(--brand-dark-brown);
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 20 20% 10%;
-    --primary: 19 45% 11%; /* #2a1810 */
-    --primary-foreground: 38 25% 97%;
-    --secondary: 30 50% 64%; /* #d4a373 */
-    --secondary-foreground: 20 20% 10%;
-    --muted: 35 20% 92%;
-    --muted-foreground: 20 10% 45%;
-    --accent: 22 50% 51%; /* #c07446 */
-    --accent-foreground: 38 25% 97%;
+    --popover-foreground: var(--brand-dark-brown);
+    
+    --primary: var(--brand-copper);
+    --primary-foreground: var(--brand-cream);
+    
+    --secondary: var(--brand-coffee-brown);
+    --secondary-foreground: var(--brand-cream);
+    
+    --muted: 37 30% 85%;
+    --muted-foreground: 17 47% 30%;
+    
+    --accent: var(--brand-copper);
+    --accent-foreground: var(--brand-cream);
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 35 15% 85%;
-    --input: 35 15% 85%;
-    --ring: 22 50% 51%;
+    
+    --border: 19 50% 25%;
+    --input: 19 50% 25%;
+    --ring: var(--brand-copper);
+    
     --radius: 2rem;
     --success: 160 80% 30%;
   }
 
   body {
-    @apply bg-[#faf7f2] text-[#1a1a1a] font-body;
+    @apply bg-[#F2E8D9] text-[#432419] font-body;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, .font-luxury {
     font-family: 'Cormorant Garamond', serif;
     letter-spacing: -0.01em;
+    @apply text-[#432419];
   }
 }
 
 @layer components {
   .luxury-card {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(42,24,16,0.08)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
+    @apply bg-white/80 backdrop-blur-xl border border-[#432419]/5 shadow-[0_8px_32px_rgba(67,36,25,0.05)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
   }
 
   .luxury-card:hover {
-    @apply shadow-[0_20px_48px_rgba(42,24,16,0.12)] -translate-y-1;
+    @apply shadow-[0_20px_48px_rgba(67,36,25,0.1)] -translate-y-1;
   }
 
   .btn-luxury {
-    @apply px-8 py-3 rounded-full font-bold bg-[#2a1810] text-[#faf7f2] transition-all duration-300 hover:shadow-2xl hover:shadow-[#2a1810]/20 active:scale-95 flex items-center justify-center gap-2;
+    @apply px-8 py-3 rounded-full font-bold bg-[#432419] text-[#F2E8D9] transition-all duration-300 hover:bg-[#8B4E2E] active:scale-95 flex items-center justify-center gap-2;
   }
 
-  .btn-outline-luxury {
-    @apply px-8 py-3 rounded-full font-bold border-2 border-[#2a1810] text-[#2a1810] transition-all duration-300 hover:bg-[#2a1810] hover:text-[#faf7f2] active:scale-95 flex items-center justify-center gap-2;
+  .btn-premium {
+    @apply px-8 py-3 rounded-full font-bold bg-[#D48A5A] text-[#F2E8D9] transition-all duration-300 hover:shadow-lg hover:shadow-[#D48A5A]/30 active:scale-95 flex items-center justify-center gap-2;
   }
 
   .glass-header {
-    @apply sticky top-0 z-50 bg-[#faf7f2]/80 backdrop-blur-md border-b border-[#2a1810]/5;
+    @apply sticky top-0 z-50 bg-[#F2E8D9]/80 backdrop-blur-md border-b border-[#432419]/5;
   }
 }
 
@@ -69,8 +86,8 @@
     scrollbar-width: none;
   }
   
-  .bg-coffee-gradient {
-    background: radial-gradient(circle at top right, #5c3a28 0%, #2a1810 100%);
+  .bg-diamond-gradient {
+    background: linear-gradient(135deg, #432419 0%, #8B4E2E 100%);
   }
 
   .hover-lift {
@@ -82,16 +99,15 @@
   }
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #faf7f2;
+  background: #F2E8D9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #c07446 0%, #5c3a28 100%);
-  border-radius: 4px;
+  background: #D48A5A;
+  border-radius: 10px;
 }
