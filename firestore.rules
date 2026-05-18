@@ -9,31 +9,29 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // وظيفة للتحقق مما إذا كان المستخدم يملك رتبة مسؤول
+    // وظيفة للتحقق مما إذا كان المستخدم يملك رتبة مسؤول (Staff)
     function isStaff() {
       return isSignedIn() && 
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
 
-    // قواعد المستخدمين
+    // قواعد المستخدمين: كل مستخدم يصل لملفه فقط، والمسؤول يرى الجميع
     match /users/{userId} {
-      // يسمح للمستخدم بقراءة وكتابة ملفه الخاص
       allow read, write: if isSignedIn() && request.auth.uid == userId;
-      // يسمح للمسؤولين بقراءة بيانات أي مستخدم
-      allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow read: if isStaff();
     }
 
-    // قواعد المنتجات (المنيو)
+    // قواعد المنتجات (المنيو): الجميع يقرأ، والمسؤول فقط يعدل
     match /products/{productId} {
-      allow read: if true; // الجميع يقرأ المنيو
-      allow write: if isStaff(); // المسؤولون فقط يعدلون المنيو
+      allow read: if true;
+      allow write: if isStaff();
     }
 
-    // قواعد الطلبات
+    // قواعد الطلبات: الجميع ينشئ طلبات، والمسؤول فقط يراها ويديرها
     match /orders/{orderId} {
-      allow create: if true; // السماح بإنشاء طلبات (حتى للضيوف)
-      allow read, update, delete: if isStaff(); // المسؤولون فقط يديرون الطلبات
+      allow create: if true;
+      allow read, update, delete: if isStaff();
     }
   }
 }
