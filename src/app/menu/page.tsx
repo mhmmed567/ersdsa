@@ -4,7 +4,7 @@
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Star, Clock } from "lucide-react";
+import { Plus, Sparkles, Star, Clock, Coffee } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useState, useEffect } from "react";
@@ -30,28 +30,9 @@ export default function MenuPage() {
 
   const { data: dbProducts, loading } = useCollection<MenuItem>(productsQuery);
 
-  const fallbackItems: MenuItem[] = [
-    {
-      id: "f1",
-      name: "V60 قهوة مختصة",
-      price: 18,
-      category: "قهوة مختصة",
-      description: "محصول إثيوبي فاخر بنكهات فاكهية وقوام متزن.",
-      image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
-    },
-    {
-      id: "f2",
-      name: "كرواسون فرنسي",
-      price: 12,
-      category: "حلويات فاخرة",
-      description: "طبقات هشة محضرة بالزبدة الطبيعية يومياً.",
-      image: PlaceHolderImages.find(img => img.id === 'pastry-croissant')?.imageUrl || "",
-    }
-  ];
-
-  const displayItems = (dbProducts && dbProducts.length > 0) 
-    ? (selectedCategory === "الكل" ? dbProducts : dbProducts.filter(item => item.category === selectedCategory))
-    : (loading ? [] : (selectedCategory === "الكل" ? fallbackItems : fallbackItems.filter(item => item.category === selectedCategory)));
+  const displayItems = (dbProducts || []).filter(item => 
+    selectedCategory === "الكل" || item.category === selectedCategory
+  );
 
   return (
     <div className="min-h-screen bg-[#F2E8D9] pb-24">
@@ -98,6 +79,16 @@ export default function MenuPage() {
         {loading && (
           <div className="flex justify-center py-20">
             <div className="animate-spin h-10 w-10 border-4 border-[#432419] border-t-transparent rounded-full" />
+          </div>
+        )}
+
+        {!loading && displayItems.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="bg-white/40 p-6 rounded-full mb-4">
+              <Coffee className="h-12 w-12 text-[#432419]/20" />
+            </div>
+            <h3 className="text-xl font-black text-[#432419]/60">قائمة الطعام فارغة حالياً</h3>
+            <p className="text-sm text-[#432419]/40 mt-2">سيتم إضافة أصناف جديدة قريباً.</p>
           </div>
         )}
 
