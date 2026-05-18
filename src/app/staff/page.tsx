@@ -37,17 +37,21 @@ export default function StaffDashboard() {
         if (userDoc.exists() && userDoc.data().role === "staff") {
           setIsStaffConfirmed(true);
         } else {
-          // محاولة أخيرة قبل التوجيه للخارج (لمعالجة تأخر المزامنة)
+          // محاولة ثانية مع انتظار بسيط (لمعالجة تأخر المزامنة عند التسجيل الجديد)
           setTimeout(async () => {
             const retryDoc = await getDoc(userRef);
             if (retryDoc.exists() && retryDoc.data().role === "staff") {
               setIsStaffConfirmed(true);
             } else {
               setIsStaffConfirmed(false);
-              toast({ title: "عذراً", description: "ليس لديك صلاحيات الوصول لهذه الصفحة", variant: "destructive" });
+              toast({ 
+                title: "عذراً", 
+                description: "ليس لديك صلاحيات الوصول لهذه الصفحة، يرجى مراجعة الإدارة.", 
+                variant: "destructive" 
+              });
               router.push("/menu");
             }
-          }, 2000);
+          }, 1500);
         }
       } catch (e) {
         console.error("Permission check failed:", e);
@@ -127,7 +131,9 @@ export default function StaffDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
         <div className="flex flex-col items-center gap-6 animate-pulse">
           <Loader2 className="h-12 w-12 text-[#432419] animate-spin" />
-          <p className="font-black text-[#432419] text-sm tracking-widest uppercase">جاري تأمين الوصول لـ Diamond Dashboard...</p>
+          <p className="font-black text-[#432419] text-sm tracking-widest uppercase text-center">
+            جاري تأمين الوصول لـ Diamond Dashboard...
+          </p>
         </div>
       </div>
     );
@@ -179,8 +185,8 @@ export default function StaffDashboard() {
                         <p className="text-[10px] text-[#8B4E2E] font-black font-code uppercase opacity-60">#{order.id}</p>
                       </div>
                       <Badge className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-wider ${
-                        order.status === 'completed' ? 'bg-success text-white' : 
-                        order.status === 'ready' ? 'bg-accent text-white' : 'bg-[#432419] text-white'
+                        order.status === 'completed' ? 'bg-green-600 text-white' : 
+                        order.status === 'ready' ? 'bg-[#D48A5A] text-white' : 'bg-[#432419] text-white'
                       }`}>
                         {order.status}
                       </Badge>
