@@ -1,18 +1,20 @@
+
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { CheckCircle2, Car, User, Phone, MessageSquare } from "lucide-react";
+import { useFirestore, useUser } from "@/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل"),
@@ -24,7 +26,9 @@ const checkoutSchema = z.object({
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
-  const { cart, placeOrder } = useStore();
+  const { cart, clearCart } = useStore();
+  const db = useFirestore();
+  const { user } = useUser();
   const router = useRouter();
 
   const form = useForm<CheckoutFormValues>({
@@ -37,14 +41,36 @@ export default function CheckoutPage() {
     },
   });
 
-  const onSubmit = (values: CheckoutFormValues) => {
-    const order = placeOrder(values);
-    router.push(`/confirmation?orderId=${order.id}`);
+  const onSubmit = async (values: CheckoutFormValues) => {
+    if (!db) return;
+
+    const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const orderData = {
+      ...values,
+      id: orderId,
+      customerUid: user?.uid || "guest",
+      items: cart,
+      totalPrice,
+      status: 'pending',
+      createdAt: Date.now(),
+    };
+
+    // حفظ الطلب في Firestore مباشرة
+    const orderRef = doc(db, "orders", orderId);
+    setDoc(orderRef, orderData);
+    
+    clearCart();
+    router.push(`/confirmation?orderId=${orderId}`);
   };
 
   if (cart.length === 0) {
-    router.push("/menu");
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Button onClick={() => router.push("/menu")}>العودة للمنيو</Button>
+      </div>
+    );
   }
 
   return (
@@ -99,7 +125,7 @@ export default function CheckoutPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2 text-accent font-bold">
-                          <Car className="h-4 w-4" /> رقم لوحة السيارة (اختياري للاستلام من السيارة)
+                          <Car className="h-4 w-4" /> رقم لوحة السيارة (اختياري)
                         </FormLabel>
                         <FormControl>
                           <Input placeholder="أ ب ج 1 2 3 4" {...field} className="bg-muted/30 focus-visible:ring-accent border-muted" />
@@ -119,7 +145,7 @@ export default function CheckoutPage() {
                         </FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="هل لديك أي طلبات خاصة؟ (مثلاً: حليب لوز، سكر زيادة..)" 
+                            placeholder="هل لديك أي طلبات خاصة؟" 
                             className="bg-muted/30 focus-visible:ring-accent border-muted resize-none min-h-[100px]" 
                             {...field} 
                           />
@@ -139,10 +165,6 @@ export default function CheckoutPage() {
               </Form>
             </CardContent>
           </Card>
-          
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            بالضغط على "تأكيد الطلب"، فإنك توافق على سياسات Warm Hearth للخصوصية والخدمة.
-          </p>
         </div>
       </main>
     </div>

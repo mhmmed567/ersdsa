@@ -1,0 +1,46 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "بيانات المستخدم وصلاحياته",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["customer", "staff"] },
+        "displayName": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "طلبات العملاء",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerUid": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhoneNumber": { "type": "string" },
+        "carLicensePlate": { "type": "string" },
+        "items": { "type": "array" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "preparing", "ready", "completed"] },
+        "createdAt": { "type": "number" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "ملفات المستخدمين"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "طلبات الطعام"
+    }
+  }
+}

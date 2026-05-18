@@ -31,20 +31,16 @@ export interface Order {
 interface WarmHearthState {
   role: 'customer' | 'staff' | null;
   cart: CartItem[];
-  orders: Order[];
   setRole: (role: 'customer' | 'staff' | null) => void;
   addToCart: (item: MenuItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  placeOrder: (orderData: Omit<Order, 'id' | 'status' | 'createdAt' | 'items' | 'totalPrice'>) => Order;
-  updateOrderStatus: (orderId: string, status: Order['status']) => void;
 }
 
 export const useStore = create<WarmHearthState>((set, get) => ({
   role: null,
   cart: [],
-  orders: [],
   setRole: (role) => set({ role }),
   addToCart: (item) => {
     const existing = get().cart.find((i) => i.id === item.id);
@@ -67,27 +63,4 @@ export const useStore = create<WarmHearthState>((set, get) => ({
       ).filter(i => i.quantity > 0),
     }),
   clearCart: () => set({ cart: [] }),
-  placeOrder: (orderData) => {
-    const cart = get().cart;
-    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const newOrder: Order = {
-      ...orderData,
-      id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      items: [...cart],
-      totalPrice,
-      status: 'pending',
-      createdAt: Date.now(),
-    };
-    set({
-      orders: [newOrder, ...get().orders],
-      cart: [],
-    });
-    return newOrder;
-  },
-  updateOrderStatus: (orderId, status) =>
-    set({
-      orders: get().orders.map((o) =>
-        o.id === orderId ? { ...o, status } : o
-      ),
-    }),
 }));
