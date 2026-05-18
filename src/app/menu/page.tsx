@@ -3,71 +3,50 @@
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Coffee, Croissant, Leaf, Dessert } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useState } from "react";
+import BottomNav from "@/components/layout/BottomNav";
 
 const MENU_ITEMS: MenuItem[] = [
   {
     id: "1",
-    name: "فلات وايت كلاسيكي",
-    price: 18,
-    category: "قهوة",
-    description: "مزيج غني من الإسبريسو والحليب المبخر بقوام حريري.",
+    name: "v60",
+    price: 1.2,
+    category: "قهوة مختصة",
+    description: "قهوة مختصة محضرة بعناية فائقة لاستخراج أفضل النكهات.",
     image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
   },
   {
     id: "2",
-    name: "كرواسون الزبدة الفاخر",
+    name: "كابتشينو",
     price: 15,
-    category: "مخبوزات",
-    description: "مخبوز يومياً بطبقات هشة من الزبدة الطبيعية.",
-    image: PlaceHolderImages.find(img => img.id === 'pastry-croissant')?.imageUrl || "",
-  },
-  {
-    id: "3",
-    name: "شاي الأعشاب المهدئ",
-    price: 12,
-    category: "مشروبات",
-    description: "مزيج منعش من البابونج والنعناع البري.",
-    image: PlaceHolderImages.find(img => img.id === 'herbal-tea')?.imageUrl || "",
-  },
-  {
-    id: "4",
-    name: "تارت الشوكولاتة والذهب",
-    price: 28,
-    category: "حلويات",
-    description: "شوكولاتة داكنة 70% مع لمسة من ورق الذهب الصالح للأكل.",
-    image: PlaceHolderImages.find(img => img.id === 'chocolate-tart')?.imageUrl || "",
-  },
-  {
-    id: "5",
-    name: "إسبانيش لاتيه بارد",
-    price: 22,
-    category: "قهوة",
-    description: "قهوة باردة محلاة توازن بين القوة والنعومة.",
+    category: "قهوة مختصة",
+    description: "إسبريسو مع حليب مبخر ورغوة كثيفة.",
     image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
   },
   {
-    id: "6",
-    name: "دانش الفواكه الموسمية",
-    price: 18,
-    category: "مخبوزات",
-    description: "عجينة مخبوزة محشوة بكريمة الفانيليا وفواكه طازجة.",
+    id: "3",
+    name: "كرواسون سادة",
+    price: 12,
+    category: "حلويات فاخرة",
+    description: "كرواسون فرنسي هش بالزبدة.",
     image: PlaceHolderImages.find(img => img.id === 'pastry-croissant')?.imageUrl || "",
+  },
+  {
+    id: "4",
+    name: "آيس لاتيه",
+    price: 18,
+    category: "مشروبات باردة",
+    description: "قهوة باردة منعشة مع الحليب.",
+    image: PlaceHolderImages.find(img => img.id === 'herbal-tea')?.imageUrl || "",
   }
 ];
 
-const CATEGORIES = [
-  { name: "الكل", icon: null },
-  { name: "قهوة", icon: Coffee },
-  { name: "مخبوزات", icon: Croissant },
-  { name: "مشروبات", icon: Leaf },
-  { name: "حلويات", icon: Dessert },
-];
+const CATEGORIES = ["الكل", "قهوة مختصة", "مشروبات باردة", "حلويات فاخرة", "إضافات"];
 
 export default function MenuPage() {
   const { addToCart } = useStore();
@@ -78,70 +57,67 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-32">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12">
-        <header className="mb-12 text-center">
-          <h1 className="text-4xl font-headline font-bold text-primary mb-4">قائمة الطعام</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            اكتشف مجموعتنا المختارة بعناية من القهوة المختصة والمخبوزات الطازجة المحضرة بكل حب.
-          </p>
-        </header>
-
+      <main className="container mx-auto px-4 mt-6">
         {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide no-scrollbar">
           {CATEGORIES.map((cat) => (
-            <Button
-              key={cat.name}
-              variant={selectedCategory === cat.name ? "default" : "outline"}
-              onClick={() => setSelectedCategory(cat.name)}
-              className="rounded-full px-6 flex items-center gap-2"
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`whitespace-nowrap px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+                selectedCategory === cat 
+                  ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                  : "bg-white text-muted-foreground shadow-sm"
+              }`}
             >
-              {cat.icon && <cat.icon className="h-4 w-4" />}
-              <span>{cat.name}</span>
-            </Button>
+              {cat}
+            </button>
           ))}
         </div>
 
         {/* Grid of Products */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="overflow-hidden group border-none shadow-sm hover:shadow-xl transition-all duration-300">
-              <div className="relative h-64 w-full overflow-hidden">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-                <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary font-bold">
-                  {item.price} ر.س
-                </Badge>
-              </div>
-              <CardHeader>
-                <div className="flex justify-between items-start mb-2">
-                  <Badge variant="secondary" className="font-medium">{item.category}</Badge>
+            <Card key={item.id} className="product-card group bg-white">
+              <div className="relative aspect-square w-full overflow-hidden p-3">
+                <div className="relative w-full h-full rounded-[2rem] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    data-ai-hint="coffee drink"
+                  />
+                  <Badge className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-primary font-bold rounded-full px-3 py-1 text-xs border-none shadow-sm">
+                    {item.price} ر.س
+                  </Badge>
                 </div>
-                <CardTitle className="text-xl font-headline text-primary">{item.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm line-clamp-2">{item.description}</p>
-              </CardContent>
-              <CardFooter className="pt-0">
+              </div>
+              <CardContent className="p-6 pt-0 text-right">
+                <div className="flex items-center gap-1 mb-1 justify-end">
+                  <span className="text-primary text-[10px]">•</span>
+                  <span className="text-primary text-[10px] font-bold">{item.category}</span>
+                </div>
+                <h3 className="text-xl font-bold text-primary mb-6">{item.name}</h3>
+                
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-11"
+                  className="w-full bg-[#1c1917] hover:bg-[#2d2a27] text-white rounded-full h-14 flex items-center justify-center gap-2 font-bold transition-all active:scale-95"
                 >
-                  <Plus className="ml-2 h-4 w-4" />
                   أضف للسلة
+                  <Plus className="h-5 w-5" />
                 </Button>
-              </CardFooter>
+              </CardContent>
             </Card>
           ))}
         </div>
       </main>
+
+      <BottomNav />
     </div>
   );
 }
