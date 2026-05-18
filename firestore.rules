@@ -9,28 +9,38 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // وظيفة جلب بيانات المستخدم الحالي
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     // وظيفة للتحقق من صلاحية المسؤول
     function isStaff() {
-      return isSignedIn() && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+      return isSignedIn() && (
+        getUserData().role == 'staff' || 
+        // السماح بإنشاء الملف الشخصي أول مرة
+        request.resource.data.role == 'staff'
+      );
     }
 
     // قواعد المستخدمين
     match /users/{userId} {
+      // السماح للمستخدم بقراءة وكتابة ملفه الخاص دائماً
       allow read, write: if isSignedIn() && request.auth.uid == userId;
-      allow read: if isSignedIn(); // السماح للمسؤولين وغيرهم بقراءة البيانات الأساسية عند الحاجة
+      // السماح للمسؤولين بقراءة بيانات المستخدمين (لإدارة الطلبات مثلاً)
+      allow read: if isSignedIn() && (request.auth.uid == userId || getUserData().role == 'staff');
     }
 
     // قواعد المنتجات (المنيو)
     match /products/{productId} {
       allow read: if true; // الجميع يقرأ المنيو
-      allow write: if isStaff(); // المسؤول فقط يضيف أو يعدل
+      allow write: if isSignedIn() && getUserData().role == 'staff';
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
       allow create: if true; // الزبائن ينشئون طلبات
-      allow read, update, delete: if isStaff(); // المسؤول فقط يديرها
+      allow read, update, delete: if isSignedIn() && getUserData().role == 'staff';
     }
   }
 }
