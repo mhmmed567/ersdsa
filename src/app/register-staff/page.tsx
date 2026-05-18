@@ -51,33 +51,27 @@ export default function RegisterStaffPage() {
         createdAt: Date.now()
       };
 
-      // 3. الحفظ في Firestore (اتباع مبدأ عدم استخدام await للموثوقية)
-      setDoc(userRef, userData)
-        .catch(async (err: any) => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: userData,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        });
+      // 3. الحفظ في Firestore - ننتظر هنا لضمان وجود الصلاحيات قبل التوجيه
+      await setDoc(userRef, userData);
 
       toast({
-        title: "تم إنشاء الحساب",
+        title: "تم إنشاء الحساب بنجاح",
         description: `أهلاً بك يا ${formData.displayName}. جاري توجيهك للوحة التحكم.`,
       });
       
-      // التوجيه للوحة التحكم مباشرة مع افتراض نجاح العملية محلياً (Optimistic UI)
+      // التوجيه للوحة التحكم بعد التأكد من الحفظ
       router.push("/staff");
 
     } catch (error: any) {
       console.error("Registration error:", error);
-      let errorMessage = "حدث خطأ في التسجيل. تأكد من تفعيل Email/Password في Firebase.";
+      let errorMessage = "حدث خطأ في التسجيل. يرجى المحاولة مرة أخرى.";
       
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً.";
-      } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "يجب تفعيل 'البريد وكلمة المرور' في إعدادات Firebase Console.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "كلمة المرور ضعيفة جداً.";
+      } else if (error.code === 'permission-denied') {
+        errorMessage = "خطأ في تصاريح قاعدة البيانات. يرجى مراجعة القواعد.";
       }
 
       toast({

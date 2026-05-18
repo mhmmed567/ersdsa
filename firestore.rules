@@ -3,27 +3,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // وظيفة للتحقق مما إذا كان المستخدم هو "مسؤول"
+    // وظيفة بسيطة للتحقق من تسجيل الدخول
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // وظيفة للتحقق مما إذا كان المستخدم موظفاً
+    // نستخدم "get" بحذر للتأكد من الصلاحية من قاعدة البيانات
     function isStaff() {
-      return request.auth != null && 
+      return isSignedIn() && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
 
     // قواعد ملفات المستخدمين
     match /users/{userId} {
-      // السماح للمستخدم بقراءة وتعديل ملفه الخاص دائماً
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // السماح للمستخدم بقراءة وتحديث ملفه الخاص دائماً (هذا ضروري جداً للدخول الأول)
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
       
-      // السماح للمسؤولين بقراءة ملفات المستخدمين الآخرين
+      // السماح للمسؤولين بقراءة ملفات الآخرين
       allow read: if isStaff();
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // السماح للجميع بإنشاء طلبات (حتى الضيوف)
+      // الجميع يمكنهم الطلب
       allow create: if true;
       
-      // السماح للمسؤولين فقط بقراءة وتحديث وحذف الطلبات
+      // المسؤولون فقط يمكنهم الإدارة
       allow read, update, delete: if isStaff();
     }
   }

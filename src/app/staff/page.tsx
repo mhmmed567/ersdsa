@@ -40,26 +40,46 @@ export default function StaffDashboard() {
       }
       
       try {
-        const userDoc = await getDoc(doc(db!, "users", user.uid));
+        // نحاول جلب بيانات المستخدم
+        const userRef = doc(db!, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+
         if (userDoc.exists() && userDoc.data().role === "staff") {
           setIsStaff(true);
         } else {
-          setIsStaff(false);
-          router.push("/menu");
+          // إذا لم يجد الصلاحية فوراً، ربما بسبب تأخر المزامنة، ننتظر ثانية ونحاول مرة أخيرة
+          setTimeout(async () => {
+            const retryDoc = await getDoc(userRef);
+            if (retryDoc.exists() && retryDoc.data().role === "staff") {
+              setIsStaff(true);
+            } else {
+              setIsStaff(false);
+              toast({
+                title: "صلاحيات غير كافية",
+                description: "هذا الحساب ليس لديه صلاحيات المسؤول.",
+                variant: "destructive"
+              });
+              router.push("/menu");
+            }
+          }, 1500);
         }
-      } catch (e) {
+      } catch (e: any) {
+        console.error("Role check error:", e);
         setIsStaff(false);
         router.push("/menu");
       }
     };
 
     if (!userLoading && db) checkRole();
-  }, [user, userLoading, db, router]);
+  }, [user, userLoading, db, router, toast]);
 
   if (userLoading || isStaff === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
-        <div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full shadow-xl" />
+        <div className="flex flex-col items-center gap-6">
+          <div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full shadow-xl" />
+          <p className="font-black text-[#432419] animate-pulse">جاري التحقق من الصلاحيات والطلبات...</p>
+        </div>
       </div>
     );
   }
