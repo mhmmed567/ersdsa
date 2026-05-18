@@ -8,9 +8,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Phone, Lock, User, AlertTriangle } from "lucide-react";
+import { UserPlus, Phone, Lock, User, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { isConfigValid } from "@/firebase/config";
 import Image from "next/image";
 
 export default function RegisterStaffPage() {
@@ -30,15 +29,6 @@ export default function RegisterStaffPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isConfigValid()) {
-      toast({
-        title: "تنبيه النظام",
-        description: "يجب ربط مشروع Firebase حقيقي لاستخدام ميزة التسجيل.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (!auth || !db) return;
     
     if (formData.secretCode !== "DIAMOND2024") {
@@ -67,17 +57,26 @@ export default function RegisterStaffPage() {
 
       toast({
         title: "تم التسجيل بنجاح",
-        description: "تم إنشاء حساب الموظف وتفعيله.",
+        description: "تم إنشاء حساب الموظف وتفعيله بنجاح.",
       });
       
       router.push("/staff");
     } catch (error: any) {
       console.error("Registration Error:", error);
-      toast({
-        title: "خطأ في التسجيل",
-        description: error.message || "فشل في إنشاء الحساب، قد يكون الرقم مسجلاً مسبقاً أو مفتاح API غير صالح.",
-        variant: "destructive"
-      });
+      
+      if (error.code === 'auth/operation-not-allowed') {
+        toast({
+          title: "يجب تفعيل خاصية التسجيل",
+          description: "يرجى الذهاب إلى Firebase Console وتفعيل (Email/Password) في قسم Authentication.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "خطأ في التسجيل",
+          description: error.message || "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -102,15 +101,6 @@ export default function RegisterStaffPage() {
           <p className="text-white/70 mt-2 font-medium relative z-10">إضافة عضو جديد لعائلة Diamond</p>
         </CardHeader>
         <CardContent className="p-10">
-          {!isConfigValid() && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800 leading-relaxed font-bold">
-                تنبيه: مفتاح Firebase الحالي تجريبي. يرجى إضافة مفتاح API حقيقي في ملف الإعدادات لتفعيل ميزة التسجيل.
-              </p>
-            </div>
-          )}
-          
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-black text-[#432419] flex items-center gap-2">
