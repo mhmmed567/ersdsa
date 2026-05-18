@@ -1,4 +1,3 @@
-
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -58,7 +57,7 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] pb-32">
+    <div className="min-h-screen bg-background pb-32">
       <Navbar />
       
       <main className="container mx-auto px-3 mt-4">
@@ -70,8 +69,8 @@ export default function MenuPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`whitespace-nowrap px-5 py-2 rounded-2xl text-[13px] font-bold transition-all ${
                 selectedCategory === cat 
-                  ? "bg-primary text-white shadow-md shadow-primary/20" 
-                  : "bg-white text-muted-foreground shadow-sm border border-transparent"
+                  ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                  : "bg-card text-muted-foreground border border-white/5"
               }`}
             >
               {cat}
@@ -82,35 +81,35 @@ export default function MenuPage() {
         {/* Grid of Products - 2 columns on mobile */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="rounded-[2rem] overflow-hidden border-none shadow-sm bg-white group transition-all active:scale-[0.98]">
+            <Card key={item.id} className="rounded-[2.5rem] overflow-hidden border-none shadow-xl bg-card group transition-all active:scale-[0.98]">
               <div className="relative aspect-square w-full p-2">
-                <div className="relative w-full h-full rounded-[1.8rem] overflow-hidden">
+                <div className="relative w-full h-full rounded-[2.2rem] overflow-hidden">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110 opacity-90"
                     sizes="(max-width: 768px) 50vw, 25vw"
                     data-ai-hint="coffee cup"
                   />
-                  <Badge className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm text-primary font-bold rounded-full px-2 py-0.5 text-[10px] border-none shadow-sm">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  <Badge className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-white font-bold rounded-full px-2.5 py-0.5 text-[10px] border-none shadow-lg">
                     {item.price} ر.س
                   </Badge>
                 </div>
               </div>
-              <CardContent className="px-3 pb-3 pt-0 text-right">
-                <div className="flex items-center gap-1 mb-0.5 justify-end">
-                  <span className="text-primary text-[8px]">•</span>
-                  <span className="text-primary text-[9px] font-bold opacity-70 uppercase">{item.category}</span>
+              <CardContent className="px-3 pb-3 pt-1 text-right">
+                <div className="flex items-center gap-1 mb-1 justify-end">
+                  <span className="text-primary text-[10px] font-bold opacity-80 uppercase tracking-tighter">{item.category}</span>
                 </div>
-                <h3 className="text-sm font-bold text-[#1c1917] mb-3 truncate">{item.name}</h3>
+                <h3 className="text-[13px] font-bold text-foreground mb-3 truncate px-1">{item.name}</h3>
                 
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full bg-[#1c1917] hover:bg-black text-white rounded-full h-9 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-all"
+                  className="w-full premium-gradient hover:opacity-90 text-white rounded-full h-9 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-all shadow-md shadow-primary/20 border-none"
                 >
                   أضف للسلة
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-3.5 w-3.5" />
                 </Button>
               </CardContent>
             </Card>
