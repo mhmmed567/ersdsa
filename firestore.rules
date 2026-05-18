@@ -1,31 +1,30 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // وظيفة للتحقق مما إذا كان المستخدم هو "مسؤول"
+    function isStaff() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+    }
+
     // قواعد ملفات المستخدمين
     match /users/{userId} {
-      // السماح لأي مستخدم مسجل بقراءة ملفه الشخصي
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // السماح للمستخدم بقراءة وتعديل ملفه الخاص دائماً
+      allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // السماح للمسؤولين بقراءة ملفات المستخدمين للتحقق من الأدوار
-      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
-      
-      // السماح للمستخدم بإنشاء وتحديث ملفه الخاص (مهم جداً عند التسجيل لأول مرة)
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // السماح للمسؤولين بقراءة ملفات المستخدمين الآخرين
+      allow read: if isStaff();
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // السماح للجميع بإنشاء طلبات
+      // السماح للجميع بإنشاء طلبات (حتى الضيوف)
       allow create: if true;
       
-      // السماح للمسؤولين فقط بقراءة وتحديث حالة الطلبات
-      allow read, update: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
-      
-      allow delete: if false;
+      // السماح للمسؤولين فقط بقراءة وتحديث وحذف الطلبات
+      allow read, update, delete: if isStaff();
     }
   }
 }

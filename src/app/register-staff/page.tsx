@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -52,37 +51,33 @@ export default function RegisterStaffPage() {
         createdAt: Date.now()
       };
 
-      // 3. الحفظ في Firestore مع ضمان اكتمال العملية
-      try {
-        await setDoc(userRef, userData);
-        
-        toast({
-          title: "تم إنشاء الحساب بنجاح",
-          description: `مرحباً بك يا ${formData.displayName}. تم منحك صلاحيات المسؤول.`,
+      // 3. الحفظ في Firestore (اتباع مبدأ عدم استخدام await للموثوقية)
+      setDoc(userRef, userData)
+        .catch(async (err: any) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'create',
+            requestResourceData: userData,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
         });
-        
-        router.push("/staff");
-      } catch (err: any) {
-        // في حال فشل Firestore، نرسل الخطأ للمتتبع
-        const permissionError = new FirestorePermissionError({
-          path: userRef.path,
-          operation: 'create',
-          requestResourceData: userData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-        throw err;
-      }
+
+      toast({
+        title: "تم إنشاء الحساب",
+        description: `أهلاً بك يا ${formData.displayName}. جاري توجيهك للوحة التحكم.`,
+      });
+      
+      // التوجيه للوحة التحكم مباشرة مع افتراض نجاح العملية محلياً (Optimistic UI)
+      router.push("/staff");
 
     } catch (error: any) {
       console.error("Registration error:", error);
-      let errorMessage = "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.";
+      let errorMessage = "حدث خطأ في التسجيل. تأكد من تفعيل Email/Password في Firebase.";
       
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً.";
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "البريد الإلكتروني غير صحيح.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "يجب تفعيل 'البريد وكلمة المرور' في إعدادات Firebase Console.";
       }
 
       toast({
@@ -90,7 +85,6 @@ export default function RegisterStaffPage() {
         description: errorMessage,
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -133,6 +127,7 @@ export default function RegisterStaffPage() {
                 <Mail className="h-4 w-4 text-[#D48A5A]" /> البريد الإلكتروني
               </label>
               <Input 
+                type="email"
                 placeholder="example@diamond.com" 
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
