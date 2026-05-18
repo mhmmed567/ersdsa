@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { UserPlus, Phone, Lock, User, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isConfigValid } from "@/firebase/config";
+import Image from "next/image";
 
 export default function RegisterStaffPage() {
   const auth = useAuth();
@@ -88,8 +89,13 @@ export default function RegisterStaffPage() {
         <CardHeader className="bg-[#432419] text-white p-10 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/20 to-transparent" />
           <div className="flex justify-center mb-6 relative z-10">
-            <div className="bg-[#D48A5A] p-4 rounded-3xl shadow-xl">
-              <UserPlus className="h-10 w-10 text-white" />
+            <div className="relative w-24 h-24 transition-transform hover:scale-110">
+              <Image 
+                src="https://i.postimg.cc/zfhr8CtC/65774426-19fd-4c21-892e-81dba55d501b-removebg-preview.png"
+                alt="Diamond Logo"
+                fill
+                className="object-contain drop-shadow-2xl"
+              />
             </div>
           </div>
           <CardTitle className="text-3xl font-headline font-black relative z-10">تسجيل مسؤول</CardTitle>
@@ -165,7 +171,7 @@ export default function RegisterStaffPage() {
             <Button 
               type="submit"
               disabled={loading}
-              className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-[#432419]/30 mt-6 active:scale-95"
+              className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl mt-6 active:scale-95"
             >
               {loading ? "جاري المعالجة..." : "إنشاء حساب المسؤول"}
             </Button>
