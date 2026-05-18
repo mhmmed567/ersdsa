@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, User, MessageSquare } from "lucide-react";
+import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, User, MessageSquare, Clock, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -82,7 +82,15 @@ export default function StaffDashboard() {
   }, [db, userRole]);
   const { data: staffData } = useCollection<any>(staffQuery);
 
-  // Analytics Calculations
+  // Filtered Orders for Staff (Hide completed)
+  const displayedOrders = useMemo(() => {
+    if (!ordersData) return [];
+    if (userRole === 'admin') return ordersData;
+    // Staff only sees non-completed orders
+    return ordersData.filter(order => order.status !== 'completed');
+  }, [ordersData, userRole]);
+
+  // Analytics Calculations (For Admin)
   const stats = useMemo(() => {
     if (!ordersData) return { dailyCount: 0, popularProduct: "جاري التحميل..." };
     const today = new Date().setHours(0, 0, 0, 0);
@@ -101,11 +109,20 @@ export default function StaffDashboard() {
     const statuses: Order['status'][] = ['pending', 'preparing', 'ready', 'completed'];
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+    
     if (db) {
       const orderRef = doc(db, "orders", orderId);
-      updateDoc(orderRef, { status: nextStatus }).catch(() => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: orderRef.path, operation: 'update' }));
-      });
+      updateDoc(orderRef, { status: nextStatus })
+        .then(() => {
+          if (nextStatus === 'completed' && userRole === 'staff') {
+            toast({ title: "تم التسليم", description: "تم إكمال الطلب بنجاح واختفى من قائمتك." });
+          } else {
+            toast({ title: "تم التحديث", description: `حالة الطلب الآن: ${nextStatus}` });
+          }
+        })
+        .catch(() => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({ path: orderRef.path, operation: 'update' }));
+        });
     }
   };
 
@@ -180,6 +197,26 @@ export default function StaffDashboard() {
     });
   };
 
+  const getStatusLabel = (status: Order['status']) => {
+    switch (status) {
+      case 'pending': return 'قيد الانتظار';
+      case 'preparing': return 'تجهيز';
+      case 'ready': return 'جاهز للاستلام';
+      case 'completed': return 'تم التسليم';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: Order['status']) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-500';
+      case 'preparing': return 'bg-blue-500';
+      case 'ready': return 'bg-orange-500';
+      case 'completed': return 'bg-green-600';
+      default: return 'bg-[#432419]';
+    }
+  };
+
   if (userLoading || isAuthChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
@@ -201,7 +238,7 @@ export default function StaffDashboard() {
             <Button variant="ghost" onClick={async () => {
               const auth = (await import('firebase/auth')).getAuth();
               auth.signOut();
-            }} className="text-destructive">خروج</Button>
+            }} className="text-destructive font-black">خروج</Button>
           </div>
         </div>
       </header>
@@ -247,7 +284,12 @@ export default function StaffDashboard() {
 
           <TabsContent value="orders">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black text-[#432419]">إدارة الطلبات الحالية</h2>
+              <div className="flex flex-col">
+                <h2 className="text-xl font-black text-[#432419]">إدارة الطلبات</h2>
+                <p className="text-xs text-[#8B4E2E] font-bold">
+                  {userRole === 'staff' ? 'تظهر فقط الطلبات النشطة' : 'تظهر جميع الطلبات للمدير'}
+                </p>
+              </div>
               
               <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
                 <DialogTrigger asChild>
@@ -303,15 +345,18 @@ export default function StaffDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ordersData?.map((order) => (
-                <Card key={order.id} className="p-6 luxury-card bg-white hover:shadow-xl transition-all">
+              {displayedOrders.map((order) => (
+                <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 grayscale-[0.5]' : ''}`}>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-black text-sm">{order.customerName}</h3>
-                    <Badge className={`${order.status === 'completed' ? 'bg-green-600' : 'bg-[#432419]'} text-[10px]`}>{order.status}</Badge>
+                    <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>
+                      {getStatusLabel(order.status)}
+                    </Badge>
                   </div>
                   <div className="text-[11px] text-[#8B4E2E] space-y-2 mb-4">
-                    <div className="flex items-center gap-2"><Car className="h-3 w-3" /> {order.carType} - {order.carLicensePlate}</div>
-                    <div className="flex items-center gap-2"><Phone className="h-3 w-3" /> {order.customerPhoneNumber}</div>
+                    <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} - {order.carLicensePlate}</div>
+                    <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#D48A5A]" /> {order.customerPhoneNumber}</div>
+                    <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
                   </div>
                   <div className="border-t border-dashed py-3 space-y-1">
                     {order.items.map((item, i) => (
@@ -321,14 +366,33 @@ export default function StaffDashboard() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-2 flex justify-between items-center">
-                    <span className="text-xs font-black text-[#432419]">الإجمالي: {order.totalPrice} ر.س</span>
-                    <Button className="h-10 bg-[#432419] text-white rounded-xl text-xs font-black px-6" onClick={() => handleStatusChange(order.id, order.status)}>تحديث الحالة</Button>
+                  <div className="mt-2 flex flex-col gap-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black text-[#432419]">الإجمالي: {order.totalPrice} ر.س</span>
+                    </div>
+                    {order.status !== 'completed' && (
+                      <Button 
+                        className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black"
+                        onClick={() => handleStatusChange(order.id, order.status)}
+                      >
+                        {order.status === 'pending' && "تجهيز الطلب"}
+                        {order.status === 'preparing' && "تم التجهيز (جاهز)"}
+                        {order.status === 'ready' && "تم التسليم (إكمال)"}
+                      </Button>
+                    )}
+                    {order.status === 'completed' && (
+                      <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
+                        <Check className="h-4 w-4" /> تم التسليم بنجاح
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
-              {ordersData?.length === 0 && (
-                <div className="col-span-full py-20 text-center text-muted-foreground font-bold">لا توجد طلبات حالية</div>
+              {displayedOrders.length === 0 && (
+                <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
+                  <ShoppingBag className="h-12 w-12 text-[#432419]/20" />
+                  <p className="text-muted-foreground font-black">لا توجد طلبات نشطة حالياً</p>
+                </div>
               )}
             </div>
           </TabsContent>
@@ -375,7 +439,7 @@ export default function StaffDashboard() {
                 <Card className="luxury-card p-6 bg-white mb-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="font-black text-lg text-[#432419]">فريق عمل دايموند</h3>
-                    <Button onClick={() => router.push("/register-staff")} className="bg-[#432419] text-white rounded-xl">
+                    <Button onClick={() => router.push("/register-staff")} className="bg-[#432419] text-white rounded-xl font-black">
                       <Plus className="ml-2 h-4 w-4" /> إضافة موظف جديد
                     </Button>
                   </div>
