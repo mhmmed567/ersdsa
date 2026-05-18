@@ -63,7 +63,6 @@ export default function CheckoutPage() {
 
     const orderRef = doc(db, "orders", orderId);
     
-    // استخدام نمط الإرسال غير المحظور مع معالجة الأخطاء
     setDoc(orderRef, orderData)
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
