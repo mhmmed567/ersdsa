@@ -40,16 +40,17 @@ export default function LoginPage() {
 
       if (userSnap.exists()) {
         const userData = userSnap.data();
-        if (userData.role === "staff") {
+        // التحقق من أن المستخدم إما موظف أو مدير
+        if (userData.role === "staff" || userData.role === "admin") {
           toast({
             title: "مرحباً بك مجدداً",
-            description: `أهلاً بك يا ${userData.displayName || "المسؤول"}.`,
+            description: `أهلاً بك يا ${userData.displayName || "في فريق العمل"}.`,
           });
           router.push("/staff");
         } else {
           toast({
             title: "عذراً",
-            description: "هذا الحساب ليس لديه صلاحيات المسؤول.",
+            description: "هذا الحساب ليس لديه صلاحيات الوصول إلى لوحة التحكم.",
             variant: "destructive"
           });
         }
@@ -93,7 +94,7 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-xl font-headline font-black relative z-10 text-white text-center">دخول المسؤولين</CardTitle>
+          <CardTitle className="text-xl font-headline font-black relative z-10 text-white text-center">دخول فريق العمل</CardTitle>
           <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest text-center">Diamond Administration</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
