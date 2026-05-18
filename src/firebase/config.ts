@@ -6,3 +6,8 @@ export const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1234567890",
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456",
 };
+
+// Check if config is using placeholder values
+export const isConfigValid = () => {
+  return firebaseConfig.apiKey !== "AIzaSyAs-DEMO-KEY-FOR-DEVELOPMENT";
+};

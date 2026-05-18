@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -9,8 +8,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Coffee, UserPlus, Phone, Lock, User } from "lucide-react";
+import { UserPlus, Phone, Lock, User, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { isConfigValid } from "@/firebase/config";
 
 export default function RegisterStaffPage() {
   const auth = useAuth();
@@ -22,15 +22,24 @@ export default function RegisterStaffPage() {
     displayName: "",
     phoneNumber: "",
     password: "",
-    secretCode: "" // كود سري لمنع أي شخص من تسجيل نفسه كموظف
+    secretCode: ""
   });
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isConfigValid()) {
+      toast({
+        title: "تنبيه النظام",
+        description: "يجب ربط مشروع Firebase حقيقي لاستخدام ميزة التسجيل.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!auth || !db) return;
     
-    // التحقق من كود التسجيل (اختياري للأمان)
     if (formData.secretCode !== "DIAMOND2024") {
       toast({
         title: "كود التحقق غير صحيح",
@@ -46,7 +55,6 @@ export default function RegisterStaffPage() {
       const result = await createUserWithEmailAndPassword(auth, email, formData.password);
       const user = result.user;
 
-      // إنشاء ملف المستخدم في Firestore بصلاحية موظف
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: email,
@@ -66,7 +74,7 @@ export default function RegisterStaffPage() {
       console.error("Registration Error:", error);
       toast({
         title: "خطأ في التسجيل",
-        description: error.message || "فشل في إنشاء الحساب، قد يكون الرقم مسجلاً مسبقاً.",
+        description: error.message || "فشل في إنشاء الحساب، قد يكون الرقم مسجلاً مسبقاً أو مفتاح API غير صالح.",
         variant: "destructive"
       });
     } finally {
@@ -76,48 +84,58 @@ export default function RegisterStaffPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
-      <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="bg-[#432419] text-white p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-[#D48A5A] p-3 rounded-2xl">
-              <UserPlus className="h-8 w-8 text-white" />
+      <Card className="w-full max-w-md border-none shadow-2xl rounded-[3rem] overflow-hidden luxury-card">
+        <CardHeader className="bg-[#432419] text-white p-10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/20 to-transparent" />
+          <div className="flex justify-center mb-6 relative z-10">
+            <div className="bg-[#D48A5A] p-4 rounded-3xl shadow-xl">
+              <UserPlus className="h-10 w-10 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-headline font-bold">تسجيل موظف جديد</CardTitle>
-          <p className="text-white/70 mt-2">إضافة مسؤول جديد لنظام Diamond</p>
+          <CardTitle className="text-3xl font-headline font-black relative z-10">تسجيل مسؤول</CardTitle>
+          <p className="text-white/70 mt-2 font-medium relative z-10">إضافة عضو جديد لعائلة Diamond</p>
         </CardHeader>
-        <CardContent className="p-8">
-          <form onSubmit={handleRegister} className="space-y-4">
+        <CardContent className="p-10">
+          {!isConfigValid() && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800 leading-relaxed font-bold">
+                تنبيه: مفتاح Firebase الحالي تجريبي. يرجى إضافة مفتاح API حقيقي في ملف الإعدادات لتفعيل ميزة التسجيل.
+              </p>
+            </div>
+          )}
+          
+          <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#432419] flex items-center gap-2">
-                <User className="h-4 w-4" /> اسم الموظف
+              <label className="text-sm font-black text-[#432419] flex items-center gap-2">
+                <User className="h-4 w-4 text-[#D48A5A]" /> اسم المسؤول
               </label>
               <Input 
                 placeholder="الاسم الكامل" 
                 value={formData.displayName}
                 onChange={(e) => setFormData({...formData, displayName: e.target.value})}
                 required
-                className="h-12 rounded-xl bg-white border-none shadow-inner"
+                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner focus-visible:ring-2 focus-visible:ring-[#D48A5A]/20"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#432419] flex items-center gap-2">
-                <Phone className="h-4 w-4" /> رقم الجوال
+              <label className="text-sm font-black text-[#432419] flex items-center gap-2">
+                <Phone className="h-4 w-4 text-[#D48A5A]" /> رقم الجوال
               </label>
               <Input 
                 placeholder="05xxxxxxxx" 
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
                 required
-                className="h-12 rounded-xl bg-white border-none text-left shadow-inner"
+                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner text-left font-code"
                 dir="ltr"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#432419] flex items-center gap-2">
-                <Lock className="h-4 w-4" /> كلمة المرور
+              <label className="text-sm font-black text-[#432419] flex items-center gap-2">
+                <Lock className="h-4 w-4 text-[#D48A5A]" /> كلمة المرور
               </label>
               <Input 
                 type="password"
@@ -125,38 +143,38 @@ export default function RegisterStaffPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 required
-                className="h-12 rounded-xl bg-white border-none text-left shadow-inner"
+                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner text-left"
                 dir="ltr"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#D48A5A] flex items-center gap-2">
-                <Lock className="h-4 w-4" /> الكود السري للتسجيل
+              <label className="text-sm font-black text-[#D48A5A] flex items-center gap-2">
+                <Lock className="h-4 w-4" /> الكود السري للإدارة
               </label>
               <Input 
                 type="password"
-                placeholder="كود الإدارة" 
+                placeholder="كود التفعيل" 
                 value={formData.secretCode}
                 onChange={(e) => setFormData({...formData, secretCode: e.target.value})}
                 required
-                className="h-12 rounded-xl bg-white border-2 border-[#D48A5A]/20 text-center font-bold"
+                className="h-14 rounded-2xl bg-white border-2 border-[#D48A5A]/20 text-center font-black tracking-widest"
               />
             </div>
 
             <Button 
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-bold text-lg transition-all shadow-lg mt-4"
+              className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-[#432419]/30 mt-6 active:scale-95"
             >
-              {loading ? "جاري الإنشاء..." : "إنشاء حساب المسؤول"}
+              {loading ? "جاري المعالجة..." : "إنشاء حساب المسؤول"}
             </Button>
             
             <Button 
               variant="ghost" 
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full text-[#8B4E2E]"
+              className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl"
             >
               لديك حساب بالفعل؟ سجل دخولك
             </Button>

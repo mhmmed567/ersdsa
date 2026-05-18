@@ -3,7 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Star, Clock } from "lucide-react";
+import { Plus, Sparkles, Star, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useState, useEffect } from "react";
@@ -73,36 +73,40 @@ export default function MenuPage() {
       <main className={`container mx-auto px-4 pt-6 transition-all duration-1000 ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
         {/* Modern Hero Section */}
-        <section className="mb-12 relative h-56 rounded-[3rem] overflow-hidden shadow-2xl group">
+        <section className="mb-12 relative h-64 rounded-[3.5rem] overflow-hidden shadow-2xl group animate-in zoom-in duration-1000">
           <Image 
             src={PlaceHolderImages.find(img => img.id === 'warm-interior')?.imageUrl || ""} 
             alt="Diamond Interior"
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
+            priority
           />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#432419]/90 to-transparent flex items-center pr-10">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-[#D48A5A]">
-                <Star className="h-4 w-4 fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">الأكثر طلباً</span>
+          <div className="absolute inset-0 bg-gradient-to-l from-[#432419] via-[#432419]/40 to-transparent flex items-center pr-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-[#D48A5A] animate-pulse">
+                <Star className="h-5 w-5 fill-current" />
+                <span className="text-xs font-black uppercase tracking-[0.4em]">Diamond Exclusive</span>
               </div>
-              <h2 className="text-4xl font-black text-white">V60 كولومبي</h2>
-              <p className="text-white/80 text-sm max-w-[250px] leading-relaxed">تجربة غنية بالمذاق تبدأ من أجود المحاصيل المختارة بعناية.</p>
+              <h2 className="text-5xl font-black text-white leading-tight">قهوة <br/> تليق بك</h2>
+              <p className="text-white/80 text-sm max-w-[280px] leading-relaxed font-medium">نستخلص لك السعادة في كل كوب، باستخدام أجود أنواع البن المختص.</p>
+              <Button className="bg-[#D48A5A] hover:bg-white hover:text-[#432419] text-white rounded-2xl px-8 h-12 transition-all font-black shadow-lg">
+                اكتشف المزيد
+                <ChevronRight className="mr-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </section>
 
-        {/* Categories Bar */}
-        <div className="flex items-center gap-4 overflow-x-auto pb-8 no-scrollbar scroll-smooth">
+        {/* Categories Bar - Floating Style */}
+        <div className="flex items-center gap-5 overflow-x-auto pb-10 no-scrollbar scroll-smooth">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              style={{ animationDelay: `${idx * 100}ms` }}
-              className={`whitespace-nowrap px-8 py-4 rounded-[2rem] text-sm font-black transition-all duration-500 animate-in fade-in slide-in-from-right-4 ${
+              className={`whitespace-nowrap px-10 py-5 rounded-3xl text-sm font-black transition-all duration-500 animate-in fade-in slide-in-from-right-4 stagger-${(idx % 5) + 1} ${
                 selectedCategory === cat 
-                  ? "bg-[#432419] text-[#F2E8D9] shadow-2xl shadow-[#432419]/30 scale-105" 
-                  : "bg-white/50 backdrop-blur-sm text-[#432419]/60 hover:text-[#432419] shadow-sm hover:shadow-md"
+                  ? "bg-[#432419] text-[#F2E8D9] shadow-[0_20px_40px_rgba(67,36,25,0.3)] scale-105" 
+                  : "bg-white/60 backdrop-blur-md text-[#432419]/60 hover:text-[#432419] shadow-sm hover:shadow-md"
               }`}
             >
               {cat}
@@ -111,48 +115,44 @@ export default function MenuPage() {
         </div>
 
         {/* Menu Grid - Modern Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {filteredItems.map((item, idx) => (
             <div 
               key={item.id} 
-              style={{ animationDelay: `${idx * 150}ms` }}
-              className="group luxury-card flex p-4 animate-in fade-in slide-in-from-bottom-8 duration-700"
+              className={`group luxury-card flex p-5 animate-in fade-in slide-in-from-bottom-8 duration-700 stagger-${(idx % 5) + 1}`}
             >
-              <div className="relative h-32 w-32 rounded-[2.5rem] overflow-hidden flex-shrink-0 shadow-xl border-2 border-white/40">
+              <div className="relative h-40 w-40 rounded-[3rem] overflow-hidden flex-shrink-0 shadow-2xl border-4 border-white/20">
                 <Image
                   src={item.image}
                   alt={item.name}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
+                <div className="absolute top-3 left-3 bg-[#D48A5A] text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg">
+                  {item.price} ر.س
+                </div>
               </div>
               
-              <div className="mr-6 flex-grow flex flex-col justify-between py-1">
+              <div className="mr-8 flex-grow flex flex-col justify-between py-2">
                 <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-black text-[#432419] group-hover:text-[#D48A5A] transition-colors leading-tight">
-                      {item.name}
-                    </h3>
-                    <span className="text-sm font-black text-[#D48A5A] bg-white px-4 py-1.5 rounded-full shadow-sm">
-                      {item.price} ر.س
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#8B4E2E]/70 line-clamp-2 leading-relaxed mb-4">
+                  <h3 className="text-2xl font-black text-[#432419] group-hover:text-[#D48A5A] transition-colors leading-tight mb-2">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm text-[#8B4E2E]/70 line-clamp-2 leading-relaxed mb-4 font-medium">
                     {item.description}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-[10px] text-[#8B4E2E]/50 font-black uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> 15m</span>
-                    <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Premium</span>
+                  <div className="flex items-center gap-5 text-[11px] text-[#8B4E2E]/60 font-black uppercase tracking-widest">
+                    <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#D48A5A]" /> 12 MIN</span>
+                    <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#D48A5A]" /> LUXURY</span>
                   </div>
                   <Button 
                     onClick={() => addToCart(item)}
-                    size="sm"
-                    className="bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl h-11 w-11 p-0 shadow-xl active:scale-95 transition-all"
+                    className="bg-[#432419] hover:bg-[#D48A5A] text-white rounded-3xl h-14 w-14 p-0 shadow-2xl active:scale-90 transition-all group-hover:rotate-12"
                   >
-                    <Plus className="h-6 w-6" />
+                    <Plus className="h-8 w-8" />
                   </Button>
                 </div>
               </div>
