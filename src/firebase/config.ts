@@ -1,13 +1,14 @@
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAs-DEMO-KEY-FOR-DEVELOPMENT",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "diamond-cafe-demo.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "diamond-cafe-demo",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "diamond-cafe-demo.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1234567890",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456",
+  apiKey: "AIzaSyCfnYNme66YLKcwEx4GV42TIo-u7fE8_fc",
+  authDomain: "demoon-86ff1.firebaseapp.com",
+  projectId: "demoon-86ff1",
+  storageBucket: "demoon-86ff1.firebasestorage.app",
+  messagingSenderId: "813039507536",
+  appId: "1:813039507536:web:e8e8cb4eb9a7ad82a2d955",
+  measurementId: "G-ZYQE51YD6R"
 };
 
-// Check if config is using placeholder values
+// فحص ما إذا كانت الإعدادات مفعلة بمفاتيح حقيقية
 export const isConfigValid = () => {
-  return firebaseConfig.apiKey !== "AIzaSyAs-DEMO-KEY-FOR-DEVELOPMENT";
+  return firebaseConfig.apiKey && firebaseConfig.apiKey !== "AIzaSyAs-DEMO-KEY-FOR-DEVELOPMENT";
 };

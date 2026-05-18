@@ -11,21 +11,20 @@ service cloud.firestore {
 
     // قواعد ملفات المستخدمين
     match /users/{userId} {
-      // يسمح للمستخدم بقراءة وكتابة ملفه الشخصي، وللموظفين بالاطلاع
       allow read: if request.auth != null && (request.auth.uid == userId || isStaff());
       allow write: if request.auth != null && (request.auth.uid == userId || isStaff());
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // يسمح لأي شخص بإنشاء طلب (للضيوف والمسجلين)
+      // يسمح لأي زبون بإنشاء طلب
       allow create: if true;
       
-      // يسمح فقط للموظفين بقراءة وتحديث الطلبات
+      // يسمح فقط للموظفين بقراءة وتحديث حالة الطلبات
       allow read: if isStaff();
       allow update: if isStaff();
       
-      // لا يسمح بحذف الطلبات نهائياً للحفاظ على السجلات
+      // لا يسمح بحذف السجلات نهائياً
       allow delete: if false;
     }
   }
