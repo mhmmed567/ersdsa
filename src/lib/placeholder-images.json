@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "coffee-latte",
+      "description": "A warm creamy latte with latte art in a ceramic mug.",
+      "imageUrl": "https://picsum.photos/seed/warm1/600/400",
+      "imageHint": "coffee latte"
+    },
+    {
+      "id": "pastry-croissant",
+      "description": "Golden flaky croissants served on an earthy wooden platter.",
+      "imageUrl": "https://picsum.photos/seed/warm2/600/400",
+      "imageHint": "croissant pastry"
+    },
+    {
+      "id": "herbal-tea",
+      "description": "Clear glass teapot with fresh herbal tea leaves.",
+      "imageUrl": "https://picsum.photos/seed/warm3/600/400",
+      "imageHint": "herbal tea"
+    },
+    {
+      "id": "chocolate-tart",
+      "description": "Rich dark chocolate tart with gold leaf garnish.",
+      "imageUrl": "https://picsum.photos/seed/warm4/600/400",
+      "imageHint": "chocolate dessert"
+    },
+    {
+      "id": "warm-interior",
+      "description": "Warm and cozy interior of the hearth cafe.",
+      "imageUrl": "https://picsum.photos/seed/warm5/1200/800",
+      "imageHint": "luxury cafe"
+    }
+  ]
 }
