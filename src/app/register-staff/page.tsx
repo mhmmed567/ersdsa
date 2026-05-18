@@ -8,9 +8,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Phone, Lock, User, AlertCircle } from "lucide-react";
+import { UserPlus, Phone, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 export default function RegisterStaffPage() {
   const auth = useAuth();
@@ -46,14 +48,26 @@ export default function RegisterStaffPage() {
       const result = await createUserWithEmailAndPassword(auth, email, formData.password);
       const user = result.user;
 
-      await setDoc(doc(db, "users", user.uid), {
+      const userRef = doc(db, "users", user.uid);
+      const userData = {
         uid: user.uid,
         email: email,
         displayName: formData.displayName,
         role: "staff",
         phoneNumber: formData.phoneNumber,
         createdAt: Date.now()
-      });
+      };
+
+      // استخدام النمط الصحيح للكتابة مع معالجة أخطاء الصلاحيات
+      setDoc(userRef, userData)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'create',
+            requestResourceData: userData,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({
         title: "تم التسجيل بنجاح",
@@ -63,20 +77,11 @@ export default function RegisterStaffPage() {
       router.push("/staff");
     } catch (error: any) {
       console.error("Registration Error:", error);
-      
-      if (error.code === 'auth/operation-not-allowed') {
-        toast({
-          title: "يجب تفعيل خاصية التسجيل",
-          description: "يرجى الذهاب إلى Firebase Console وتفعيل (Email/Password) في قسم Authentication.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "خطأ في التسجيل",
-          description: error.message || "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "خطأ في التسجيل",
+        description: error.message || "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -111,7 +116,7 @@ export default function RegisterStaffPage() {
                 value={formData.displayName}
                 onChange={(e) => setFormData({...formData, displayName: e.target.value})}
                 required
-                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner focus-visible:ring-2 focus-visible:ring-[#D48A5A]/20"
+                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner"
               />
             </div>
 

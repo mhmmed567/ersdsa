@@ -6,25 +6,27 @@ service cloud.firestore {
     // وظيفة للتحقق مما إذا كان المستخدم موظفاً
     function isStaff() {
       return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
 
     // قواعد ملفات المستخدمين
     match /users/{userId} {
+      // يسمح للمستخدم بقراءة وكتابة ملفه الشخصي، وللموظفين بالقراءة
       allow read: if request.auth != null && (request.auth.uid == userId || isStaff());
-      allow write: if request.auth != null && (request.auth.uid == userId || isStaff());
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // يسمح لأي زبون بإنشاء طلب
+      // يسمح لأي زبون بإنشاء طلب (حتى بدون تسجيل دخول)
       allow create: if true;
       
       // يسمح فقط للموظفين بقراءة وتحديث حالة الطلبات
       allow read: if isStaff();
       allow update: if isStaff();
       
-      // لا يسمح بحذف السجلات نهائياً
+      // لا يسمح بحذف الطلبات نهائياً للحفاظ على السجلات
       allow delete: if false;
     }
   }
