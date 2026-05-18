@@ -11,7 +11,7 @@
     --brand-cream: 37 47% 91%;         /* #F2E8D9 */
     --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
 
-    --background: var(--brand-cream);
+    --background: 37 47% 95%;          /* Softer Cream */
     --foreground: var(--brand-dark-brown);
     
     --card: 0 0% 100%;
@@ -21,59 +21,48 @@
     --popover-foreground: var(--brand-dark-brown);
     
     --primary: var(--brand-copper);
-    --primary-foreground: var(--brand-cream);
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: var(--brand-coffee-brown);
+    --secondary: var(--brand-dark-brown);
     --secondary-foreground: var(--brand-cream);
     
-    --muted: 37 30% 85%;
-    --muted-foreground: 17 47% 30%;
+    --muted: 37 30% 90%;
+    --muted-foreground: 17 47% 40%;
     
     --accent: var(--brand-copper);
-    --accent-foreground: var(--brand-cream);
+    --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 19 50% 25%;
-    --input: 19 50% 25%;
+    --border: 17 47% 85%;
+    --input: 17 47% 85%;
     --ring: var(--brand-copper);
     
-    --radius: 2rem;
-    --success: 160 80% 30%;
+    --radius: 1.5rem;
   }
 
   body {
-    @apply bg-[#F2E8D9] text-[#432419] font-body;
+    @apply bg-[#F7F3ED] text-[#432419] font-body selection:bg-[#D48A5A]/30;
     -webkit-font-smoothing: antialiased;
-  }
-
-  h1, h2, h3, .font-luxury {
-    font-family: 'Cormorant Garamond', serif;
-    letter-spacing: -0.01em;
-    @apply text-[#432419];
   }
 }
 
 @layer components {
-  .luxury-card {
-    @apply bg-white/80 backdrop-blur-xl border border-[#432419]/5 shadow-[0_8px_32px_rgba(67,36,25,0.05)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
+  .modern-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_10px_30px_rgba(67,36,25,0.04)] rounded-[2rem] transition-all duration-500 overflow-hidden;
   }
 
-  .luxury-card:hover {
-    @apply shadow-[0_20px_48px_rgba(67,36,25,0.1)] -translate-y-1;
+  .modern-card:hover {
+    @apply shadow-[0_20px_50px_rgba(67,36,25,0.08)] -translate-y-1.5;
   }
 
-  .btn-luxury {
-    @apply px-8 py-3 rounded-full font-bold bg-[#432419] text-[#F2E8D9] transition-all duration-300 hover:bg-[#8B4E2E] active:scale-95 flex items-center justify-center gap-2;
+  .btn-modern {
+    @apply h-12 px-8 rounded-full font-bold bg-[#432419] text-[#F2E8D9] transition-all duration-300 hover:bg-[#D48A5A] hover:shadow-lg hover:shadow-[#D48A5A]/20 active:scale-95 flex items-center justify-center gap-2;
   }
 
-  .btn-premium {
-    @apply px-8 py-3 rounded-full font-bold bg-[#D48A5A] text-[#F2E8D9] transition-all duration-300 hover:shadow-lg hover:shadow-[#D48A5A]/30 active:scale-95 flex items-center justify-center gap-2;
-  }
-
-  .glass-header {
-    @apply sticky top-0 z-50 bg-[#F2E8D9]/80 backdrop-blur-md border-b border-[#432419]/5;
+  .glass-nav {
+    @apply sticky top-4 z-50 mx-4 bg-white/70 backdrop-blur-lg border border-white/40 shadow-lg rounded-full;
   }
 }
 
@@ -86,28 +75,27 @@
     scrollbar-width: none;
   }
   
-  .bg-diamond-gradient {
-    background: linear-gradient(135deg, #432419 0%, #8B4E2E 100%);
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#432419] to-[#D48A5A];
   }
 
-  .hover-lift {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+  .image-zoom {
+    @apply overflow-hidden;
   }
   
-  .hover-lift:hover {
-    @apply -translate-y-1;
+  .image-zoom img {
+    @apply transition-transform duration-700 hover:scale-110;
   }
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F2E8D9;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D48A5A;
-  border-radius: 10px;
+  @apply bg-[#D48A5A]/30 rounded-full hover:bg-[#D48A5A]/50 transition-colors;
 }

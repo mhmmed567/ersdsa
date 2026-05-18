@@ -1,6 +1,6 @@
 "use client";
 
-import { Coffee, ShoppingBag } from "lucide-react";
+import { Coffee, ShoppingBag, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
@@ -16,29 +16,33 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-50">
-      <div className="bg-[#432419]/90 backdrop-blur-2xl rounded-full shadow-[0_15px_40px_rgba(67,36,25,0.25)] border border-white/10 p-2 flex items-center justify-between">
+    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
+      <div className="bg-[#1C1C1C]/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/5 p-2 flex items-center justify-between">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link 
               key={item.href} 
               href={item.href}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-full transition-all duration-500 relative ${
-                isActive ? "bg-[#D48A5A] text-[#F2E8D9] shadow-xl" : "text-[#F2E8D9]/60 hover:text-[#F2E8D9]"
+              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-[2rem] transition-all duration-700 relative ${
+                isActive 
+                  ? "bg-white text-[#432419] shadow-[0_10px_20px_rgba(255,255,255,0.1)]" 
+                  : "text-white/40 hover:text-white/80"
               }`}
             >
               <div className="relative">
-                <item.icon className={`h-5 w-5 ${isActive ? "text-white" : ""}`} />
-                {!isActive && item.count !== undefined && item.count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#D48A5A] text-white text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold border border-[#432419]">
+                <item.icon className={`h-6 w-6 ${isActive ? "scale-110" : ""}`} />
+                {item.count !== undefined && item.count > 0 && !isActive && (
+                  <span className="absolute -top-2 -right-2 bg-[#D48A5A] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-[#1C1C1C] animate-in zoom-in">
                     {item.count}
                   </span>
                 )}
               </div>
-              <span className="text-[13px] font-bold">{item.name}</span>
+              <span className={`text-sm font-black transition-all ${isActive ? "opacity-100" : "opacity-0 absolute"}`}>
+                {item.name}
+              </span>
               {isActive && item.count !== undefined && item.count > 0 && (
-                <span className="bg-[#432419] text-[#F2E8D9] text-[10px] px-2 py-0.5 rounded-full font-bold">
+                <span className="bg-[#432419] text-white text-[11px] px-2.5 py-0.5 rounded-xl font-black ml-1">
                   {item.count}
                 </span>
               )}
