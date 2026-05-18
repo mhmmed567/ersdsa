@@ -1,20 +1,22 @@
 
 'use client';
 
-import React from 'react';
-import { FirebaseApp } from 'firebase/app';
-import { Firestore } from 'firebase/firestore';
-import { Auth } from 'firebase/auth';
+import React, { useMemo } from 'react';
 import { FirebaseProvider } from './provider';
+import { initializeFirebase } from './index';
 
 export const FirebaseClientProvider: React.FC<{
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
   children: React.ReactNode;
-}> = ({ firebaseApp, firestore, auth, children }) => {
+}> = ({ children }) => {
+  // نقوم بالتهيئة هنا داخل مكون العميل لضمان عدم تمرير الكائنات من الخادم
+  const config = useMemo(() => initializeFirebase(), []);
+
   return (
-    <FirebaseProvider firebaseApp={firebaseApp} firestore={firestore} auth={auth}>
+    <FirebaseProvider 
+      firebaseApp={config.firebaseApp} 
+      firestore={config.firestore} 
+      auth={config.auth}
+    >
       {children}
     </FirebaseProvider>
   );
