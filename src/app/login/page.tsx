@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Coffee, Lock, Phone } from "lucide-react";
+import { Coffee, Lock, Phone, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -28,8 +28,6 @@ export default function LoginPage() {
     
     setLoading(true);
     try {
-      // في الخلفية نستخدم رقم الجوال كـ Email لإرضاء متطلبات Firebase Auth
-      // الموظف يدخل رقمه فقط دون الحاجة لإيميل
       const formattedEmail = phoneNumber.includes('@') ? phoneNumber : `${phoneNumber}@diamond.com`;
       
       const result = await signInWithEmailAndPassword(auth, formattedEmail, password);
@@ -41,6 +39,10 @@ export default function LoginPage() {
       if (userSnap.exists()) {
         const userData = userSnap.data();
         if (userData.role === "staff") {
+          toast({
+            title: "مرحباً بك",
+            description: `أهلاً بك يا ${userData.displayName || "زميلنا"}.`,
+          });
           router.push("/staff");
         } else {
           toast({
@@ -48,7 +50,6 @@ export default function LoginPage() {
             description: "هذا الحساب ليس لديه صلاحيات الموظفين.",
             variant: "destructive"
           });
-          router.push("/menu");
         }
       } else {
         toast({
@@ -70,11 +71,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
       <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="bg-primary text-white p-8 text-center">
+        <CardHeader className="bg-[#432419] text-white p-8 text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-white/20 p-3 rounded-2xl">
+            <div className="bg-[#D48A5A] p-3 rounded-2xl">
               <Coffee className="h-10 w-10 text-white" />
             </div>
           </div>
@@ -84,7 +85,7 @@ export default function LoginPage() {
         <CardContent className="p-8">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center gap-2">
+              <label className="text-sm font-bold text-[#432419] flex items-center gap-2">
                 <Phone className="h-4 w-4" /> رقم الجوال
               </label>
               <Input 
@@ -93,13 +94,13 @@ export default function LoginPage() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-muted/50 border-none text-left"
+                className="h-12 rounded-xl bg-white border-none text-left shadow-inner"
                 dir="ltr"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center gap-2">
+              <label className="text-sm font-bold text-[#432419] flex items-center gap-2">
                 <Lock className="h-4 w-4" /> كلمة المرور
               </label>
               <Input 
@@ -108,7 +109,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-muted/50 border-none text-left"
+                className="h-12 rounded-xl bg-white border-none text-left shadow-inner"
                 dir="ltr"
               />
             </div>
@@ -116,19 +117,29 @@ export default function LoginPage() {
             <Button 
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-primary/20"
+              className="w-full h-14 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-bold text-lg transition-all shadow-lg"
             >
               {loading ? "جاري التحقق..." : "تسجيل الدخول"}
             </Button>
             
-            <Button 
-              variant="ghost" 
-              type="button"
-              onClick={() => router.push("/menu")}
-              className="w-full text-muted-foreground hover:text-primary"
-            >
-              العودة لقائمة الطعام
-            </Button>
+            <div className="flex flex-col gap-2 pt-4">
+              <Button 
+                variant="outline" 
+                type="button"
+                onClick={() => router.push("/register-staff")}
+                className="w-full text-[#432419] border-[#432419]/20 rounded-xl"
+              >
+                <UserPlus className="ml-2 h-4 w-4" /> تسجيل موظف جديد
+              </Button>
+              <Button 
+                variant="ghost" 
+                type="button"
+                onClick={() => router.push("/menu")}
+                className="w-full text-[#8B4E2E]"
+              >
+                العودة لقائمة الطعام
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
