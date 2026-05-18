@@ -102,14 +102,14 @@ export default function MenuPage() {
                   <span className="text-primary text-[10px]">•</span>
                   <span className="text-primary text-[10px] font-bold">{item.category}</span>
                 </div>
-                <h3 className="text-xl font-bold text-primary mb-6">{item.name}</h3>
+                <h3 className="text-xl font-bold text-primary mb-4">{item.name}</h3>
                 
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full bg-[#1c1917] hover:bg-[#2d2a27] text-white rounded-full h-14 flex items-center justify-center gap-2 font-bold transition-all active:scale-95"
+                  className="w-full bg-[#1c1917] hover:bg-[#2d2a27] text-white rounded-full h-11 flex items-center justify-center gap-2 text-sm font-bold transition-all active:scale-95"
                 >
                   أضف للسلة
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
