@@ -9,7 +9,8 @@
         "uid": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "role": { "type": "string", "enum": ["customer", "staff"] },
-        "displayName": { "type": "string" }
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "number" }
       },
       "required": ["uid", "email", "role"]
     },
@@ -45,6 +46,15 @@
         "createdAt": { "type": "number" },
         "specialRequests": { "type": "string" }
       }
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "إعدادات التطبيق العامة",
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string" },
+        "updatedAt": { "type": "number" }
+      }
     }
   },
   "auth": {
@@ -62,6 +72,10 @@
     "/orders/{orderId}": {
       "schema": "Order",
       "description": "طلبات الطعام"
+    },
+    "/settings/{settingId}": {
+      "schema": "AppConfig",
+      "description": "إعدادات التطبيق"
     }
   }
 }
