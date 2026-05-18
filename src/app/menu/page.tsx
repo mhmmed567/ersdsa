@@ -1,4 +1,3 @@
-
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -8,7 +7,6 @@ import { Plus, Sparkles, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useState, useEffect } from "react";
-import BottomNav from "@/components/layout/BottomNav";
 
 const MENU_ITEMS: MenuItem[] = [
   {
@@ -69,7 +67,7 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-[#F2E8D9] pb-32">
+    <div className="min-h-screen bg-[#F2E8D9] pb-12">
       <Navbar />
       
       <main className={`container mx-auto px-4 pt-6 transition-all duration-1000 ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
@@ -94,7 +92,7 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {/* Categories - Modern Pill Style */}
+        {/* Categories */}
         <div className="flex items-center gap-3 overflow-x-auto pb-8 no-scrollbar scroll-smooth">
           {CATEGORIES.map((cat, idx) => (
             <button
@@ -112,7 +110,7 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Menu Grid - Vertical List Style for Modern Mobile Feel */}
+        {/* Menu Grid */}
         <div className="space-y-6">
           {filteredItems.map((item, idx) => (
             <div 
@@ -159,7 +157,7 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Floating Special Offer */}
+        {/* Special Offer */}
         <div className="mt-16 bg-[#1C1C1C] rounded-[3rem] p-8 text-white relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
@@ -174,13 +172,10 @@ export default function MenuPage() {
               سجل الآن
             </Button>
           </div>
-          {/* Abstract Golden Circle */}
           <div className="absolute -top-10 -left-10 w-48 h-48 bg-[#D48A5A]/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#8B4E2E]/20 rounded-full blur-3xl" />
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }
