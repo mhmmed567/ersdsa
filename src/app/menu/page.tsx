@@ -88,7 +88,7 @@ export default function MenuPage() {
               <Coffee className="h-12 w-12 text-[#432419]/20" />
             </div>
             <h3 className="text-xl font-black text-[#432419]/60">قائمة الطعام فارغة حالياً</h3>
-            <p className="text-sm text-[#432419]/40 mt-2">سيتم إضافة أصناف جديدة قريباً.</p>
+            <p className="text-sm text-[#432419]/40 mt-2">سيتم إضافة أصناف جديدة قريباً من قبل الإدارة.</p>
           </div>
         )}
 
@@ -98,13 +98,15 @@ export default function MenuPage() {
               key={item.id} 
               className="group luxury-card bg-white/90 backdrop-blur-sm p-2 sm:p-3 flex flex-col gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-3 duration-500"
             >
-              <div className="relative aspect-[4/5] w-full rounded-xl overflow-hidden shadow-sm">
-                <Image
-                  src={item.image || "https://picsum.photos/seed/cup/600/400"}
-                  alt={item.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+              <div className="relative aspect-[4/5] w-full rounded-xl overflow-hidden shadow-sm bg-muted">
+                {item.image && (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                )}
                 <div className="absolute bottom-2 right-2 bg-[#432419]/80 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-lg shadow-sm border border-white/10">
                   {item.price} ر.س
                 </div>

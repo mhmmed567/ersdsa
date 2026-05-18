@@ -13,11 +13,15 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'admin';
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().role == 'admin';
     }
 
     function isStaff() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (getUserData().role == 'staff' || getUserData().role == 'admin');
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        (getUserData().role == 'staff' || getUserData().role == 'admin');
     }
 
     match /users/{userId} {
@@ -33,7 +37,8 @@ service cloud.firestore {
 
     match /orders/{orderId} {
       allow create: if true;
-      allow read, update, delete: if isStaff();
+      allow read, update: if isStaff();
+      allow delete: if isAdmin();
     }
 
     match /settings/{settingId} {

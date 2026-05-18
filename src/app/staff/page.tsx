@@ -11,10 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, Clock, Check, PlusCircle, AlertCircle } from "lucide-react";
+import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, Loader2, Users, Settings, TrendingUp, Calendar, Check, PlusCircle, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -67,7 +67,7 @@ export default function StaffDashboard() {
           }, 2000);
         }
       } catch (e) {
-        console.error(e);
+        console.error("Role check error:", e);
       } finally {
         setIsAuthChecking(false);
       }
@@ -98,6 +98,7 @@ export default function StaffDashboard() {
   // Filtered Orders logic
   const displayedOrders = useMemo(() => {
     if (!ordersData) return [];
+    // الموظف يرى فقط غير المكتمل، المدير يرى كل شيء
     if (userRole === 'admin') return ordersData;
     return ordersData.filter(order => order.status !== 'completed');
   }, [ordersData, userRole]);
@@ -219,7 +220,7 @@ export default function StaffDashboard() {
       case 'pending': return 'انتظار';
       case 'preparing': return 'تجهيز';
       case 'ready': return 'جاهز';
-      case 'completed': return 'مكتمل';
+      case 'completed': return 'تم التسليم';
       default: return status;
     }
   };
@@ -369,9 +370,9 @@ export default function StaffDashboard() {
                           تحديث إلى: {getStatusLabel(order.status === 'pending' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'completed')}
                         </Button>
                       )}
-                      {order.status === 'completed' && userRole === 'admin' && (
+                      {order.status === 'completed' && (
                         <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
-                          <Check className="h-4 w-4" /> طلب مكتمل
+                          <Check className="h-4 w-4" /> تم التسليم بنجاح
                         </div>
                       )}
                     </div>
@@ -421,8 +422,8 @@ export default function StaffDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {productsData?.map(product => (
                     <Card key={product.id} className="luxury-card p-4 bg-white">
-                      <div className="relative h-32 rounded-xl overflow-hidden mb-3">
-                        <img src={product.image} className="w-full h-full object-cover" />
+                      <div className="relative h-32 rounded-xl overflow-hidden mb-3 bg-muted">
+                        {product.image && <img src={product.image} className="w-full h-full object-cover" />}
                       </div>
                       <h3 className="font-black text-sm mb-1">{product.name}</h3>
                       <p className="text-[10px] text-slate-500 mb-3">{product.price} ر.س</p>
@@ -447,7 +448,7 @@ export default function StaffDashboard() {
                   {staffData?.map(member => (
                     <Card key={member.uid} className="luxury-card p-4 bg-white flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#432419]/5 flex items-center justify-center text-[#432419] font-black">{member.displayName?.[0] || 'U'}</div>
+                        <div className="w-10 h-10 rounded-full bg-[#432419]/5 flex items-center justify-center text-[#432419] font-black uppercase">{member.displayName?.[0] || 'U'}</div>
                         <div>
                           <p className="font-black text-sm">{member.displayName}</p>
                           <p className="text-[10px] text-slate-500">{member.email}</p>
