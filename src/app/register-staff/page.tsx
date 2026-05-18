@@ -24,8 +24,7 @@ export default function RegisterStaffPage() {
   const [formData, setFormData] = useState({
     displayName: "",
     email: "",
-    password: "",
-    secretCode: ""
+    password: ""
   });
   const [loading, setLoading] = useState(false);
 
@@ -34,15 +33,6 @@ export default function RegisterStaffPage() {
     
     if (!auth || !db) return;
     
-    if (formData.secretCode !== "DIAMOND2024") {
-      toast({
-        title: "كود التحقق غير صحيح",
-        description: "يرجى إدخال الكود السري الصحيح لتسجيل موظف جديد.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setLoading(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -98,7 +88,7 @@ export default function RegisterStaffPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
-      <Card className="w-full max-w-md border-none shadow-2xl rounded-[3rem] overflow-hidden luxury-card">
+      <Card className="w-full max-w-md border-none shadow-2xl rounded-[3rem] overflow-hidden luxury-card bg-white/95 backdrop-blur-md">
         <CardHeader className="bg-[#432419] text-white p-10 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/20 to-transparent" />
           <div className="flex justify-center mb-6 relative z-10">
@@ -158,20 +148,6 @@ export default function RegisterStaffPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-black text-[#D48A5A] flex items-center gap-2">
-                <Lock className="h-4 w-4" /> الكود السري للإدارة
-              </label>
-              <Input 
-                type="password"
-                placeholder="كود التفعيل" 
-                value={formData.secretCode}
-                onChange={(e) => setFormData({...formData, secretCode: e.target.value})}
-                required
-                className="h-14 rounded-2xl bg-white border-2 border-[#D48A5A]/20 text-center font-black tracking-widest"
-              />
-            </div>
-
             <Button 
               type="submit"
               disabled={loading}
@@ -184,7 +160,7 @@ export default function RegisterStaffPage() {
               variant="ghost" 
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl"
+              className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl mt-2"
             >
               هل تملك حساباً؟ سجل دخولك من هنا
             </Button>
