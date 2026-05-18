@@ -1,15 +1,15 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Diamond Brand Colors - Exact HSL */
+    /* Diamond Brand Colors */
     --brand-dark-brown: 17 47% 18%;    /* #432419 */
     --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
     --brand-copper: 24 58% 59%;        /* #D48A5A */
     --brand-cream: 37 47% 91%;         /* #F2E8D9 */
-    --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
 
     --background: var(--brand-cream);
     --foreground: var(--brand-dark-brown);
@@ -17,32 +17,13 @@
     --card: 0 0% 100%;
     --card-foreground: var(--brand-dark-brown);
     
-    --popover: 0 0% 100%;
-    --popover-foreground: var(--brand-dark-brown);
-    
     --primary: var(--brand-dark-brown);
     --primary-foreground: var(--brand-cream);
-    
-    --secondary: var(--brand-copper);
-    --secondary-foreground: 0 0% 100%;
-    
-    --muted: 37 30% 85%;
-    --muted-foreground: 17 47% 40%;
     
     --accent: var(--brand-copper);
     --accent-foreground: 0 0% 100%;
     
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --success: 142 76% 36%;
-    --success-foreground: 355 100% 100%;
-    
-    --border: 17 47% 80%;
-    --input: 17 47% 80%;
-    --ring: var(--brand-copper);
-    
-    --radius: 2.5rem;
+    --radius: 1.5rem;
   }
 
   body {
@@ -52,19 +33,15 @@
 
 @layer components {
   .luxury-card {
-    @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-[0_15px_40px_rgba(67,36,25,0.05)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
+    @apply bg-white border border-white/40 shadow-md rounded-[1.5rem] sm:rounded-[2.5rem] transition-all duration-300 overflow-hidden;
   }
 
   .luxury-card:hover {
-    @apply shadow-[0_25px_60px_rgba(67,36,25,0.12)] -translate-y-1.5 bg-white/90;
+    @apply shadow-xl -translate-y-1 bg-white/95;
   }
 
   .glass-effect {
-    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-xl;
-  }
-
-  .btn-diamond {
-    @apply bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black transition-all active:scale-95 shadow-xl shadow-[#432419]/20;
+    @apply bg-white/40 backdrop-blur-2xl border border-white/40 shadow-lg;
   }
 }
 
@@ -76,22 +53,4 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
-  .animate-stagger-1 { animation-delay: 0.1s; }
-  .animate-stagger-2 { animation-delay: 0.2s; }
-  .animate-stagger-3 { animation-delay: 0.3s; }
-}
-
-@keyframes progress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(0); }
-}
-
-@keyframes sparkle {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.8; }
-}
-
-.animate-sparkle {
-  animation: sparkle 2s infinite;
 }
