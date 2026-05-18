@@ -1,3 +1,4 @@
+
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -155,25 +156,6 @@ export default function MenuPage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Special Offer */}
-        <div className="mt-16 bg-[#1C1C1C] rounded-[3rem] p-8 text-white relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-2xl bg-[#D48A5A]/20 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-[#D48A5A]" />
-              </div>
-              <span className="font-black text-sm tracking-widest text-[#D48A5A]">Diamond Special</span>
-            </div>
-            <h2 className="text-2xl font-black mb-3">انضم لعضوية المذاق الفاخر</h2>
-            <p className="text-white/40 text-xs mb-6 leading-loose">احصل على نقاط مع كل طلب واستبدلها بمشروباتك المفضلة مجاناً.</p>
-            <Button className="bg-[#D48A5A] hover:bg-[#E29A6B] text-white rounded-full px-12 h-14 font-black transition-all text-sm">
-              سجل الآن
-            </Button>
-          </div>
-          <div className="absolute -top-10 -left-10 w-48 h-48 bg-[#D48A5A]/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#8B4E2E]/20 rounded-full blur-3xl" />
         </div>
       </main>
     </div>
