@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, Clock, Check, PlusCircle } from "lucide-react";
+import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, Clock, Check, PlusCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -56,7 +56,15 @@ export default function StaffDashboard() {
             router.push("/menu");
           }
         } else {
-          router.push("/menu");
+          // محاولة ثانية في حال تأخر إنشاء الملف الشخصي
+          setTimeout(async () => {
+            const retrySnap = await getDoc(userRef);
+            if (retrySnap.exists()) {
+              setUserRole(retrySnap.data().role);
+            } else {
+              router.push("/menu");
+            }
+          }, 2000);
         }
       } catch (e) {
         console.error(e);
@@ -81,13 +89,13 @@ export default function StaffDashboard() {
   }, [db, userRole]);
   const { data: productsData } = useCollection<MenuItem>(productsQuery);
 
-  const staffQuery = useMemoFirebase(() => {
-    if (!db || !userRole) return null;
+  const staffDataQuery = useMemoFirebase(() => {
+    if (!db || !userRole || userRole !== 'admin') return null;
     return query(collection(db, "users"), where("role", "in", ["staff", "admin"]));
   }, [db, userRole]);
-  const { data: staffData } = useCollection<any>(staffQuery);
+  const { data: staffData } = useCollection<any>(staffDataQuery);
 
-  // Filtered Orders logic: Staff sees active only, Admin sees all
+  // Filtered Orders logic
   const displayedOrders = useMemo(() => {
     if (!ordersData) return [];
     if (userRole === 'admin') return ordersData;
@@ -102,7 +110,7 @@ export default function StaffDashboard() {
     
     const productCounts: Record<string, number> = {};
     ordersData.forEach(order => {
-      order.items.forEach(item => {
+      order.items?.forEach(item => {
         productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
       });
     });
@@ -186,7 +194,8 @@ export default function StaffDashboard() {
       createdBy: user?.uid
     };
 
-    addDoc(collection(db, "orders"), orderData)
+    const orderRef = doc(db, "orders", orderId);
+    setDoc(orderRef, orderData)
       .then(() => {
         toast({ title: "تم إنشاء الطلب", description: `رقم الطلب: ${orderId}` });
         setIsOrderDialogOpen(false);
@@ -228,7 +237,10 @@ export default function StaffDashboard() {
   if (userLoading || isAuthChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
-        <Loader2 className="h-10 w-10 animate-spin text-[#432419]" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-[#432419]" />
+          <p className="text-sm font-black text-[#432419]/60">جاري التحقق من الصلاحيات...</p>
+        </div>
       </div>
     );
   }
@@ -323,43 +335,56 @@ export default function StaffDashboard() {
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedOrders.map((order) => (
-                <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-black text-sm">{order.customerName}</h3>
-                    <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>{getStatusLabel(order.status)}</Badge>
-                  </div>
-                  <div className="text-[11px] text-[#8B4E2E] space-y-2 mb-4">
-                    <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} {order.carLicensePlate !== "N/A" && `- ${order.carLicensePlate}`}</div>
-                    <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
-                  </div>
-                  <div className="border-t border-dashed py-3 space-y-1">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex justify-between text-[10px] font-bold">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span className="text-[#D48A5A]">{item.price * item.quantity} ر.س</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex flex-col gap-3">
-                    <div className="flex justify-between items-center font-black text-xs text-[#432419]">
-                      <span>الإجمالي: {order.totalPrice} ر.س</span>
+            {ordersLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-[#432419]/40" />
+                <p className="text-sm font-black text-[#432419]/40">جاري جلب الطلبات...</p>
+              </div>
+            ) : displayedOrders.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedOrders.map((order) => (
+                  <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-black text-sm">{order.customerName}</h3>
+                      <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>{getStatusLabel(order.status)}</Badge>
                     </div>
-                    {order.status !== 'completed' && (
-                      <Button className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black shadow-md" onClick={() => handleStatusChange(order.id, order.status)}>
-                        تحديث إلى: {getStatusLabel(order.status === 'pending' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'completed')}
-                      </Button>
-                    )}
-                    {order.status === 'completed' && userRole === 'admin' && (
-                      <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
-                        <Check className="h-4 w-4" /> طلب مكتمل
+                    <div className="text-[11px] text-[#8B4E2E] space-y-2 mb-4">
+                      <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} {order.carLicensePlate !== "N/A" && `- ${order.carLicensePlate}`}</div>
+                      <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
+                    </div>
+                    <div className="border-t border-dashed py-3 space-y-1">
+                      {order.items?.map((item, i) => (
+                        <div key={i} className="flex justify-between text-[10px] font-bold">
+                          <span>{item.quantity}x {item.name}</span>
+                          <span className="text-[#D48A5A]">{item.price * item.quantity} ر.س</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex flex-col gap-3">
+                      <div className="flex justify-between items-center font-black text-xs text-[#432419]">
+                        <span>الإجمالي: {order.totalPrice} ر.س</span>
                       </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
+                      {order.status !== 'completed' && (
+                        <Button className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black shadow-md" onClick={() => handleStatusChange(order.id, order.status)}>
+                          تحديث إلى: {getStatusLabel(order.status === 'pending' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'completed')}
+                        </Button>
+                      )}
+                      {order.status === 'completed' && userRole === 'admin' && (
+                        <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
+                          <Check className="h-4 w-4" /> طلب مكتمل
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-24 bg-white/40 rounded-[2.5rem] border border-dashed border-[#432419]/20">
+                <AlertCircle className="h-12 w-12 text-[#432419]/20 mb-4" />
+                <h3 className="text-lg font-black text-[#432419]/60">لا توجد طلبات حالية</h3>
+                <p className="text-xs font-bold text-[#432419]/40 mt-1">بمجرد وصول طلب جديد سيظهر هنا فوراً.</p>
+              </div>
+            )}
           </TabsContent>
 
           {userRole === 'admin' && (
