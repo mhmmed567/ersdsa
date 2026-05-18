@@ -1,17 +1,20 @@
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useUser, useFirestore, useCollection } from "@/firebase";
-import { doc, getDoc, collection, updateDoc, query, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, updateDoc, query, orderBy, addDoc, deleteDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { Order } from "@/lib/store";
+import { Order, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LogOut, Coffee, Sparkles, Car, Phone, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { LogOut, Coffee, Sparkles, Car, Phone, Clock, Plus, Trash2, LayoutDashboard, ShoppingBag } from "lucide-react";
 import { staffOrderSummary } from "@/ai/flows/staff-order-summary";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
@@ -21,14 +24,22 @@ export default function StaffDashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [isStaff, setIsStaff] = useState<boolean | null>(null);
-  
+  const [activeTab, setActiveTab] = useState("orders");
+
+  // Orders Query
   const ordersQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, "orders"), orderBy("createdAt", "desc"));
   }, [db]);
-
   const { data: ordersData, loading: ordersLoading } = useCollection<Order>(ordersQuery);
-  
+
+  // Products Query
+  const productsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, "products"), orderBy("createdAt", "desc"));
+  }, [db]);
+  const { data: productsData } = useCollection<MenuItem>(productsQuery);
+
   const [aiSummaries, setAiSummaries] = useState<Record<string, string>>({});
   const [loadingAi, setLoadingAi] = useState<Record<string, boolean>>({});
 
@@ -38,51 +49,22 @@ export default function StaffDashboard() {
         if (!userLoading) router.push("/login");
         return;
       }
-      
       try {
-        // نحاول جلب بيانات المستخدم
         const userRef = doc(db!, "users", user.uid);
         const userDoc = await getDoc(userRef);
-
         if (userDoc.exists() && userDoc.data().role === "staff") {
           setIsStaff(true);
         } else {
-          // إذا لم يجد الصلاحية فوراً، ربما بسبب تأخر المزامنة، ننتظر ثانية ونحاول مرة أخيرة
-          setTimeout(async () => {
-            const retryDoc = await getDoc(userRef);
-            if (retryDoc.exists() && retryDoc.data().role === "staff") {
-              setIsStaff(true);
-            } else {
-              setIsStaff(false);
-              toast({
-                title: "صلاحيات غير كافية",
-                description: "هذا الحساب ليس لديه صلاحيات المسؤول.",
-                variant: "destructive"
-              });
-              router.push("/menu");
-            }
-          }, 1500);
+          setIsStaff(false);
+          router.push("/menu");
         }
-      } catch (e: any) {
-        console.error("Role check error:", e);
+      } catch (e) {
         setIsStaff(false);
         router.push("/menu");
       }
     };
-
     if (!userLoading && db) checkRole();
-  }, [user, userLoading, db, router, toast]);
-
-  if (userLoading || isStaff === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
-        <div className="flex flex-col items-center gap-6">
-          <div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full shadow-xl" />
-          <p className="font-black text-[#432419] animate-pulse">جاري التحقق من الصلاحيات والطلبات...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [user, userLoading, db, router]);
 
   const handleStatusChange = async (orderId: string, currentStatus: Order['status']) => {
     const statuses: Order['status'][] = ['pending', 'preparing', 'ready', 'completed'];
@@ -91,170 +73,125 @@ export default function StaffDashboard() {
     
     if (db) {
       const orderRef = doc(db, "orders", orderId);
-      const updateData = { status: nextStatus };
-      
-      updateDoc(orderRef, updateData)
+      updateDoc(orderRef, { status: nextStatus })
         .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: orderRef.path,
             operation: 'update',
-            requestResourceData: updateData,
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
+          }));
         });
     }
   };
 
-  const generateSummary = async (order: Order) => {
-    if (loadingAi[order.id]) return;
-    setLoadingAi(prev => ({ ...prev, [order.id]: true }));
-    try {
-      const result = await staffOrderSummary({
-        customerName: order.customerName,
-        customerPhoneNumber: order.customerPhoneNumber || "",
-        carLicensePlate: order.carLicensePlate || "",
-        orderItems: order.items.map(item => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price
-        })),
-        specialRequests: order.specialRequests || "",
-        totalPrice: order.totalPrice
+  const handleAddProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!db) return;
+    const formData = new FormData(e.currentTarget);
+    const newProduct = {
+      name: formData.get("name") as string,
+      price: Number(formData.get("price")),
+      category: formData.get("category") as string,
+      description: formData.get("description") as string,
+      image: "https://picsum.photos/seed/" + Math.random() + "/600/400",
+      createdAt: Date.now()
+    };
+
+    addDoc(collection(db, "products"), newProduct)
+      .then(() => {
+        toast({ title: "تمت الإضافة", description: "تم إضافة المنتج بنجاح" });
+        (e.target as HTMLFormElement).reset();
       });
-      setAiSummaries(prev => ({ ...prev, [order.id]: result.summary }));
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل في إنشاء ملخص الذكاء الاصطناعي",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingAi(prev => ({ ...prev, [order.id]: false }));
-    }
   };
 
-  const getStatusBadge = (status: Order['status']) => {
-    switch (status) {
-      case 'pending': return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-none font-black px-4 py-1">معلق</Badge>;
-      case 'preparing': return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-none font-black px-4 py-1">يُحضر</Badge>;
-      case 'ready': return <Badge variant="outline" className="bg-green-50 text-green-700 border-none font-black px-4 py-1">جاهز</Badge>;
-      case 'completed': return <Badge variant="outline" className="bg-gray-50 text-gray-500 border-none font-black px-4 py-1">مكتمل</Badge>;
-    }
+  const handleDeleteProduct = async (id: string) => {
+    if (!db) return;
+    deleteDoc(doc(db, "products", id));
   };
+
+  if (userLoading || isStaff === null) {
+    return <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]"><div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full" /></div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#F2E8D9]">
-      <header className="bg-[#432419] text-[#F2E8D9] p-6 sticky top-0 z-50 shadow-2xl backdrop-blur-xl">
+      <header className="bg-[#432419] text-[#F2E8D9] p-6 sticky top-0 z-50 shadow-2xl">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="bg-[#D48A5A] p-2.5 rounded-2xl shadow-lg">
-              <Coffee className="h-7 w-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight leading-none">Diamond Dashboard</h1>
-              <p className="text-[10px] text-[#D48A5A] font-black uppercase tracking-[0.3em]">Staff Administration</p>
-            </div>
+            <div className="bg-[#D48A5A] p-2 rounded-xl"><Coffee className="h-6 w-6 text-white" /></div>
+            <h1 className="text-xl font-black">Diamond Dashboard</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => router.push("/")} className="text-[#F2E8D9] hover:bg-white/10 rounded-full px-6 h-12">
-            <LogOut className="ml-2 h-5 w-5" /> خروج
-          </Button>
+          <Button variant="ghost" onClick={() => router.push("/")} className="text-[#F2E8D9] hover:bg-white/10"><LogOut className="ml-2 h-4 w-4" /> خروج</Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12">
-        <div className="grid gap-10">
-          <div className="flex justify-between items-end border-b-2 border-[#432419]/5 pb-6">
-            <h2 className="text-4xl font-black text-[#432419] tracking-tight">إدارة الطلبات المباشرة</h2>
-            <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-white">
-              <Clock className="h-5 w-5 text-[#D48A5A]" />
-              <span className="font-black text-sm">{ordersData?.length || 0} طلب قيد التنفيذ</span>
-            </div>
-          </div>
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="orders" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white/50 p-1 rounded-2xl">
+            <TabsTrigger value="orders" className="rounded-xl font-black data-[state=active]:bg-[#432419] data-[state=active]:text-white">
+              <ShoppingBag className="ml-2 h-4 w-4" /> الطلبات
+            </TabsTrigger>
+            <TabsTrigger value="products" className="rounded-xl font-black data-[state=active]:bg-[#432419] data-[state=active]:text-white">
+              <LayoutDashboard className="ml-2 h-4 w-4" /> المنيو
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {ordersLoading ? (
-               <div className="col-span-full text-center py-20 animate-pulse font-black text-[#432419]">جاري تحميل الطلبات...</div>
-            ) : !ordersData || ordersData.length === 0 ? (
-               <div className="col-span-full text-center py-32 luxury-card p-12 bg-white/50 text-[#8B4E2E]/40 font-black">لا توجد طلبات نشطة في الوقت الحالي.</div>
-            ) : (
-              ordersData.map((order) => (
-                <Card key={order.id} className="luxury-card border-none bg-white p-0 overflow-hidden group">
-                  <div className="p-7 space-y-7">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-2xl font-black text-[#432419] mb-1">{order.customerName}</h3>
-                        <p className="text-xs text-[#8B4E2E] flex items-center gap-2 font-black">
-                          <Phone className="h-4 w-4" /> {order.customerPhoneNumber}
-                        </p>
+          <TabsContent value="orders">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ordersData?.map((order) => (
+                <Card key={order.id} className="luxury-card p-6 space-y-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-black text-lg">{order.customerName}</h3>
+                    <Badge className="bg-[#D48A5A]">{order.status}</Badge>
+                  </div>
+                  <div className="text-xs space-y-1 opacity-70">
+                    <p className="flex items-center gap-2"><Phone className="h-3 w-3" /> {order.customerPhoneNumber}</p>
+                    <p className="flex items-center gap-2"><Car className="h-3 w-3" /> {order.carType} - {order.carLicensePlate}</p>
+                  </div>
+                  <div className="border-t pt-2">
+                    {order.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span>{item.quantity}x {item.name}</span>
+                        <span>{item.price * item.quantity} ر.س</span>
                       </div>
-                      {getStatusBadge(order.status)}
-                    </div>
-
-                    <div className="bg-[#F2E8D9]/50 p-5 rounded-3xl space-y-4 border border-[#D48A5A]/10 shadow-inner">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-[#432419] p-2 rounded-xl shadow-md">
-                          <Car className="h-5 w-5 text-[#D48A5A]" />
-                        </div>
-                        <span className="font-black text-[#432419] text-base">{order.carType}</span>
-                      </div>
-                      <div className="text-xs bg-white inline-block px-5 py-2.5 rounded-2xl border border-[#D48A5A]/10 font-black text-[#432419] shadow-sm">
-                        رقم اللوحة: <span className="text-[#D48A5A] ml-1">{order.carLicensePlate}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 py-2">
-                      {order.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm items-center">
-                          <span className="text-[#432419] font-medium"><span className="font-black text-[#D48A5A] ml-2">{item.quantity}x</span> {item.name}</span>
-                          <span className="font-black text-[#432419]">{item.price * item.quantity} ر.س</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between items-center pt-4 border-t border-[#432419]/5">
-                      <span className="text-xs font-black text-[#8B4E2E] uppercase tracking-widest">Grand Total:</span>
-                      <span className="text-3xl font-black text-[#432419]">{order.totalPrice} <span className="text-sm font-bold">ر.س</span></span>
-                    </div>
-
-                    <div className="flex gap-4 pt-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className="flex-1 rounded-2xl h-14 border-2 border-[#432419]/5 font-black hover:bg-[#432419]/5 transition-all"
-                            onClick={() => generateSummary(order)}
-                          >
-                            <Sparkles className="h-5 w-5 ml-2 text-[#D48A5A] group-hover:animate-sparkle" /> ملخص ذكي
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="rounded-[3rem] bg-[#F2E8D9] border-none shadow-2xl p-0 overflow-hidden max-w-md">
-                          <DialogHeader className="p-8 bg-[#432419] text-white">
-                            <DialogTitle className="font-black text-2xl">تحليل الطلب بالذكاء الاصطناعي</DialogTitle>
-                          </DialogHeader>
-                          <div className="p-10 text-base leading-relaxed whitespace-pre-wrap text-[#432419] font-black bg-white/50 backdrop-blur-xl">
-                            {loadingAi[order.id] ? (
-                              <div className="flex flex-col items-center gap-4 py-10">
-                                <div className="animate-spin h-10 w-10 border-4 border-[#D48A5A] border-t-transparent rounded-full" />
-                                <p className="text-sm animate-pulse">جاري معالجة البيانات وتحليل الطلب...</p>
-                              </div>
-                            ) : aiSummaries[order.id] || "لا يوجد ملخص متاح حالياً."}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      
-                      <Button 
-                        className="flex-1 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl h-14 font-black shadow-xl shadow-[#432419]/20 transition-all active:scale-95" 
-                        onClick={() => handleStatusChange(order.id, order.status)}
-                      >
-                        تحديث الحالة
-                      </Button>
-                    </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-[#432419]" onClick={() => handleStatusChange(order.id, order.status)}>تحديث الحالة</Button>
                   </div>
                 </Card>
-              ))
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="products">
+            <div className="grid gap-8">
+              <Card className="p-6 luxury-card max-w-2xl mx-auto w-full">
+                <h3 className="text-lg font-black mb-4 flex items-center gap-2"><Plus className="h-5 w-5" /> إضافة منتج جديد</h3>
+                <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input name="name" placeholder="اسم المنتج" required />
+                  <Input name="price" type="number" placeholder="السعر" required />
+                  <Input name="category" placeholder="التصنيف (مثلاً: قهوة مختصة)" required />
+                  <Input name="description" placeholder="وصف قصير" required />
+                  <Button type="submit" className="sm:col-span-2 bg-[#D48A5A]">إضافة للمنيو</Button>
+                </form>
+              </Card>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {productsData?.map((product) => (
+                  <Card key={product.id} className="p-4 luxury-card flex items-center justify-between">
+                    <div>
+                      <h4 className="font-black text-sm">{product.name}</h4>
+                      <p className="text-xs opacity-60">{product.price} ر.س</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteProduct(product.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

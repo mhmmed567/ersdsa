@@ -7,55 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Plus, Sparkles, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useState, useEffect } from "react";
-
-const MENU_ITEMS: MenuItem[] = [
-  {
-    id: "1",
-    name: "V60 قهوة مختصة",
-    price: 18,
-    category: "قهوة مختصة",
-    description: "محصول إثيوبي فاخر بنكهات فاكهية وقوام متزن.",
-    image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
-  },
-  {
-    id: "2",
-    name: "كابتشينو فاخر",
-    price: 15,
-    category: "قهوة مختصة",
-    description: "مزيج مثالي من الإسبريسو المركز والحليب المخملي.",
-    image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
-  },
-  {
-    id: "3",
-    name: "كرواسون فرنسي",
-    price: 12,
-    category: "حلويات فاخرة",
-    description: "طبقات هشة محضرة بالزبدة الطبيعية يومياً.",
-    image: PlaceHolderImages.find(img => img.id === 'pastry-croissant')?.imageUrl || "",
-  },
-  {
-    id: "4",
-    name: "تشيز كيك دايموند",
-    price: 24,
-    category: "حلويات فاخرة",
-    description: "لمسة عصرية من التشيز كيك مع صوص التوت البري.",
-    image: PlaceHolderImages.find(img => img.id === 'chocolate-tart')?.imageUrl || "",
-  },
-  {
-    id: "5",
-    name: "آيس سبانش لاتيه",
-    price: 20,
-    category: "مشروبات باردة",
-    description: "انتعاش القهوة مع الحليب المكثف والثلج.",
-    image: "https://picsum.photos/seed/ice/600/400",
-  }
-];
+import { useState, useEffect, useMemo } from "react";
+import { useFirestore, useCollection } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
 
 const CATEGORIES = ["الكل", "قهوة مختصة", "مشروبات باردة", "حلويات فاخرة"];
 
 export default function MenuPage() {
   const { addToCart } = useStore();
+  const db = useFirestore();
   const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [isMounted, setIsMounted] = useState(false);
 
@@ -63,9 +23,39 @@ export default function MenuPage() {
     setIsMounted(true);
   }, []);
 
-  const filteredItems = selectedCategory === "الكل" 
-    ? MENU_ITEMS 
-    : MENU_ITEMS.filter(item => item.category === selectedCategory);
+  const productsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, "products"), orderBy("createdAt", "desc"));
+  }, [db]);
+
+  const { data: dbProducts, loading } = useCollection<MenuItem>(productsQuery);
+
+  // Fallback items if DB is empty
+  const fallbackItems: MenuItem[] = [
+    {
+      id: "f1",
+      name: "V60 قهوة مختصة",
+      price: 18,
+      category: "قهوة مختصة",
+      description: "محصول إثيوبي فاخر بنكهات فاكهية وقوام متزن.",
+      image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
+    },
+    {
+      id: "f2",
+      name: "كرواسون فرنسي",
+      price: 12,
+      category: "حلويات فاخرة",
+      description: "طبقات هشة محضرة بالزبدة الطبيعية يومياً.",
+      image: PlaceHolderImages.find(img => img.id === 'pastry-croissant')?.imageUrl || "",
+    }
+  ];
+
+  const displayItems = useMemo(() => {
+    const items = (dbProducts && dbProducts.length > 0) ? dbProducts : (loading ? [] : fallbackItems);
+    return selectedCategory === "الكل" 
+      ? items 
+      : items.filter(item => item.category === selectedCategory);
+  }, [dbProducts, loading, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-[#F2E8D9] pb-24">
@@ -73,7 +63,6 @@ export default function MenuPage() {
       
       <main className={`container mx-auto px-3 sm:px-4 pt-4 transition-all duration-1000 ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
-        {/* Compact Hero Section */}
         <section className="mb-6 relative h-40 sm:h-56 rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-lg group">
           <Image 
             src={PlaceHolderImages.find(img => img.id === 'warm-interior')?.imageUrl || ""} 
@@ -94,7 +83,6 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {/* Categories Bar */}
         <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
@@ -111,16 +99,21 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Menu Grid - 2 columns on mobile, 3 on tablet, 4 on desktop, 5 on large screens */}
+        {loading && (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin h-10 w-10 border-4 border-[#432419] border-t-transparent rounded-full" />
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
-          {filteredItems.map((item) => (
+          {displayItems.map((item) => (
             <div 
               key={item.id} 
               className="group luxury-card bg-white/90 backdrop-blur-sm p-2 sm:p-3 flex flex-col gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-3 duration-500"
             >
               <div className="relative aspect-[4/5] w-full rounded-xl overflow-hidden shadow-sm">
                 <Image
-                  src={item.image}
+                  src={item.image || "https://picsum.photos/seed/cup/600/400"}
                   alt={item.name}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"

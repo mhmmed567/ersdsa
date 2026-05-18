@@ -13,6 +13,21 @@
       },
       "required": ["uid", "email", "role"]
     },
+    "Product": {
+      "title": "Product",
+      "description": "أصناف قائمة الطعام",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "price", "category"]
+    },
     "Order": {
       "title": "Order",
       "description": "طلبات العملاء",
@@ -39,6 +54,10 @@
     "/users/{userId}": {
       "schema": "UserProfile",
       "description": "ملفات المستخدمين"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "أصناف المنيو"
     },
     "/orders/{orderId}": {
       "schema": "Order",
