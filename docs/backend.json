@@ -8,7 +8,7 @@
       "properties": {
         "uid": { "type": "string" },
         "email": { "type": "string", "format": "email" },
-        "role": { "type": "string", "enum": ["customer", "staff"] },
+        "role": { "type": "string", "enum": ["customer", "staff", "admin"] },
         "displayName": { "type": "string" },
         "createdAt": { "type": "number" }
       },
@@ -44,7 +44,8 @@
         "totalPrice": { "type": "number" },
         "status": { "type": "string", "enum": ["pending", "preparing", "ready", "completed"] },
         "createdAt": { "type": "number" },
-        "specialRequests": { "type": "string" }
+        "specialRequests": { "type": "string" },
+        "createdBy": { "type": "string", "description": "ID of the staff who created it manually" }
       }
     },
     "AppConfig": {
