@@ -10,13 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, Clock, Check } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag, Loader2, Users, Settings, Image as ImageIcon, TrendingUp, Calendar, CheckCircle2, Clock, Check, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import Link from "next/link";
 
 export default function StaffDashboard() {
   const { user, loading: userLoading } = useUser();
@@ -29,6 +31,9 @@ export default function StaffDashboard() {
   // Manual Order State
   const [manualOrderItems, setManualOrderItems] = useState<CartItem[]>([]);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+
+  // Product Edit State
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", category: "قهوة مختصة", description: "", image: "" });
 
   // App Settings for Logo
   const settingsRef = useMemo(() => db ? doc(db, "settings", "app") : null, [db]);
@@ -77,31 +82,32 @@ export default function StaffDashboard() {
   const { data: productsData } = useCollection<MenuItem>(productsQuery);
 
   const staffQuery = useMemoFirebase(() => {
-    if (!db || userRole !== "admin") return null;
+    if (!db || !userRole) return null;
     return query(collection(db, "users"), where("role", "in", ["staff", "admin"]));
   }, [db, userRole]);
   const { data: staffData } = useCollection<any>(staffQuery);
 
-  // Filtered Orders for Staff (Hide completed)
+  // Filtered Orders logic: Staff sees active only, Admin sees all
   const displayedOrders = useMemo(() => {
     if (!ordersData) return [];
     if (userRole === 'admin') return ordersData;
-    // الموظف يرى فقط الطلبات غير المكتملة
     return ordersData.filter(order => order.status !== 'completed');
   }, [ordersData, userRole]);
 
-  // Analytics Calculations (For Admin)
+  // Analytics Calculations
   const stats = useMemo(() => {
-    if (!ordersData) return { dailyCount: 0, popularProduct: "جاري التحميل..." };
+    if (!ordersData) return { dailyCount: 0, popularProduct: "جاري الحساب..." };
     const today = new Date().setHours(0, 0, 0, 0);
     const dailyOrders = ordersData.filter(order => (order.createdAt || 0) >= today);
+    
     const productCounts: Record<string, number> = {};
     ordersData.forEach(order => {
       order.items.forEach(item => {
         productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
       });
     });
-    const popular = Object.entries(productCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "لا يوجد بيانات";
+    const popular = Object.entries(productCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "لا توجد بيانات";
+    
     return { dailyCount: dailyOrders.length, popularProduct: popular };
   }, [ordersData]);
 
@@ -114,11 +120,7 @@ export default function StaffDashboard() {
       const orderRef = doc(db, "orders", orderId);
       updateDoc(orderRef, { status: nextStatus })
         .then(() => {
-          if (nextStatus === 'completed' && userRole === 'staff') {
-            toast({ title: "تم التسليم", description: "تم إكمال الطلب بنجاح واختفى من قائمتك." });
-          } else {
-            toast({ title: "تم التحديث", description: `حالة الطلب الآن: ${nextStatus}` });
-          }
+          toast({ title: "تم التحديث", description: `حالة الطلب الآن: ${getStatusLabel(nextStatus)}` });
         })
         .catch(() => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({ path: orderRef.path, operation: 'update' }));
@@ -126,10 +128,45 @@ export default function StaffDashboard() {
     }
   };
 
+  const handleAddProduct = async () => {
+    if (!db) return;
+    const productId = `PROD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    const productRef = doc(db, "products", productId);
+    
+    setDoc(productRef, {
+      ...newProduct,
+      id: productId,
+      price: Number(newProduct.price),
+      createdAt: Date.now()
+    }).then(() => {
+      toast({ title: "تم الإضافة", description: "تمت إضافة المنتج الجديد للمنيو بنجاح" });
+      setNewProduct({ name: "", price: "", category: "قهوة مختصة", description: "", image: "" });
+    });
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!db) return;
+    deleteDoc(doc(db, "products", id)).then(() => {
+      toast({ title: "تم الحذف", description: "تم حذف المنتج من المنيو" });
+    });
+  };
+
+  const handleUpdateLogo = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!db) return;
+    const formData = new FormData(e.currentTarget);
+    const logoUrl = formData.get("logoUrl") as string;
+    
+    setDoc(doc(db, "settings", "app"), { logoUrl, updatedAt: Date.now() }, { merge: true })
+      .then(() => {
+        toast({ title: "تم التحديث", description: "تم تغيير شعار التطبيق بنجاح" });
+      });
+  };
+
   const handleManualOrder = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!db || manualOrderItems.length === 0) {
-      toast({ title: "خطأ", description: "يرجى إضافة منتج واحد على الأقل", variant: "destructive" });
+      toast({ title: "تنبيه", description: "يرجى إضافة منتج واحد على الأقل للطلب اليدوي", variant: "destructive" });
       return;
     }
     const formData = new FormData(e.currentTarget);
@@ -139,8 +176,8 @@ export default function StaffDashboard() {
     const orderData = {
       id: orderId,
       customerName: formData.get("customerName") as string,
-      customerPhoneNumber: formData.get("customerPhone") as string,
-      carType: formData.get("carType") as string || "استلام من الكاونتر",
+      customerPhoneNumber: formData.get("customerPhone") as string || "N/A",
+      carType: formData.get("carType") as string || "استلام كاونتر",
       carLicensePlate: formData.get("carPlate") as string || "N/A",
       items: manualOrderItems,
       totalPrice,
@@ -149,14 +186,12 @@ export default function StaffDashboard() {
       createdBy: user?.uid
     };
 
-    const ordersCollection = collection(db, "orders");
-    addDoc(ordersCollection, orderData)
+    addDoc(collection(db, "orders"), orderData)
       .then(() => {
-        toast({ title: "تم الطلب", description: "تم إنشاء الطلب اليدوي بنجاح" });
+        toast({ title: "تم إنشاء الطلب", description: `رقم الطلب: ${orderId}` });
         setIsOrderDialogOpen(false);
         setManualOrderItems([]);
-      })
-      .catch((e) => console.error(e));
+      });
   };
 
   const addItemToManualOrder = (productId: string) => {
@@ -172,10 +207,10 @@ export default function StaffDashboard() {
 
   const getStatusLabel = (status: Order['status']) => {
     switch (status) {
-      case 'pending': return 'قيد الانتظار';
+      case 'pending': return 'انتظار';
       case 'preparing': return 'تجهيز';
-      case 'ready': return 'جاهز للاستلام';
-      case 'completed': return 'تم التسليم';
+      case 'ready': return 'جاهز';
+      case 'completed': return 'مكتمل';
       default: return status;
     }
   };
@@ -186,7 +221,7 @@ export default function StaffDashboard() {
       case 'preparing': return 'bg-blue-500';
       case 'ready': return 'bg-orange-500';
       case 'completed': return 'bg-green-600';
-      default: return 'bg-[#432419]';
+      default: return 'bg-slate-500';
     }
   };
 
@@ -204,7 +239,7 @@ export default function StaffDashboard() {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <LayoutDashboard className="h-6 w-6 text-[#D48A5A]" />
-            <h1 className="text-xl font-black">Diamond {userRole === 'admin' ? 'Manager' : 'Staff'} Panel</h1>
+            <h1 className="text-xl font-black">Diamond {userRole === 'admin' ? 'Manager' : 'Staff'}</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => router.push("/menu")} className="text-white border-white/20 bg-white/10 hover:bg-white/20">المنيو</Button>
@@ -257,61 +292,32 @@ export default function StaffDashboard() {
 
           <TabsContent value="orders">
             <div className="flex justify-between items-center mb-6">
-              <div className="flex flex-col">
-                <h2 className="text-xl font-black text-[#432419]">إدارة الطلبات</h2>
-                <p className="text-xs text-[#8B4E2E] font-bold">
-                  {userRole === 'staff' ? 'تظهر فقط الطلبات النشطة' : 'تظهر جميع الطلبات للمدير'}
-                </p>
-              </div>
-              
+              <h2 className="text-xl font-black text-[#432419]">إدارة الطلبات</h2>
               <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#D48A5A] text-white rounded-full font-black px-6">
+                  <Button className="bg-[#D48A5A] text-white rounded-full font-black px-6 shadow-lg">
                     <Plus className="ml-2 h-4 w-4" /> طلب جديد
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-[#F2E8D9] border-none rounded-[2.5rem]">
-                  <DialogHeader>
-                    <DialogTitle className="text-right font-black text-[#432419]">إنشاء طلب يدوي</DialogTitle>
-                  </DialogHeader>
+                <DialogContent className="max-w-md bg-[#F2E8D9] border-none rounded-[2rem]">
+                  <DialogHeader><DialogTitle className="text-right font-black">طلب يدوي جديد</DialogTitle></DialogHeader>
                   <form onSubmit={handleManualOrder} className="space-y-4 pt-4">
-                    <Input name="customerName" placeholder="اسم الزبون" required className="bg-white border-none rounded-xl h-12" />
-                    <Input name="customerPhone" placeholder="رقم الجوال" required className="bg-white border-none rounded-xl h-12" dir="ltr" />
-                    <Input name="carType" placeholder="نوع السيارة (اختياري)" className="bg-white border-none rounded-xl h-12" />
-                    <Input name="carPlate" placeholder="رقم اللوحة (اختياري)" className="bg-white border-none rounded-xl h-12" dir="ltr" />
-                    
-                    <div className="space-y-2">
-                      <p className="text-xs font-black text-[#432419]/60 px-1">اختر المنتجات</p>
-                      <Select onValueChange={addItemToManualOrder}>
-                        <SelectTrigger className="bg-white border-none rounded-xl h-12">
-                          <SelectValue placeholder="اختر صنفاً..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productsData?.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name} - {p.price} ر.س</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <Input name="customerName" placeholder="اسم الزبون" required className="rounded-xl border-none h-12" />
+                    <Input name="customerPhone" placeholder="رقم الجوال" className="rounded-xl border-none h-12" dir="ltr" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input name="carType" placeholder="نوع السيارة" className="rounded-xl border-none h-12" />
+                      <Input name="carPlate" placeholder="رقم اللوحة" className="rounded-xl border-none h-12" dir="ltr" />
                     </div>
-
+                    <Select onValueChange={addItemToManualOrder}>
+                      <SelectTrigger className="rounded-xl border-none h-12 bg-white"><SelectValue placeholder="أضف منتجاً للطلب" /></SelectTrigger>
+                      <SelectContent>{productsData?.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.price} ر.س</SelectItem>)}</SelectContent>
+                    </Select>
                     {manualOrderItems.length > 0 && (
-                      <div className="bg-white/50 p-4 rounded-2xl space-y-2">
-                        {manualOrderItems.map(item => (
-                          <div key={item.id} className="flex justify-between text-xs font-bold">
-                            <span>{item.quantity}x {item.name}</span>
-                            <span>{item.price * item.quantity} ر.س</span>
-                          </div>
-                        ))}
-                        <div className="border-t border-dashed pt-2 flex justify-between font-black text-[#432419]">
-                          <span>الإجمالي</span>
-                          <span>{manualOrderItems.reduce((s, i) => s + i.price * i.quantity, 0)} ر.س</span>
-                        </div>
+                      <div className="bg-white/40 p-4 rounded-xl space-y-2 max-h-40 overflow-y-auto">
+                        {manualOrderItems.map(item => <div key={item.id} className="flex justify-between text-xs font-bold"><span>{item.quantity}x {item.name}</span><span>{item.price * item.quantity} ر.س</span></div>)}
                       </div>
                     )}
-
-                    <DialogFooter>
-                      <Button type="submit" className="w-full bg-[#432419] text-white rounded-xl h-12 font-black mt-4">تأكيد الطلب</Button>
-                    </DialogFooter>
+                    <Button type="submit" className="w-full h-14 bg-[#432419] text-white rounded-xl font-black">تأكيد الطلب ({manualOrderItems.reduce((s,i) => s + i.price*i.quantity, 0)} ر.س)</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -319,16 +325,13 @@ export default function StaffDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedOrders.map((order) => (
-                <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+                <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-black text-sm">{order.customerName}</h3>
-                    <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>
-                      {getStatusLabel(order.status)}
-                    </Badge>
+                    <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>{getStatusLabel(order.status)}</Badge>
                   </div>
                   <div className="text-[11px] text-[#8B4E2E] space-y-2 mb-4">
-                    <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} - {order.carLicensePlate}</div>
-                    <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#D48A5A]" /> {order.customerPhoneNumber}</div>
+                    <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} {order.carLicensePlate !== "N/A" && `- ${order.carLicensePlate}`}</div>
                     <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
                   </div>
                   <div className="border-t border-dashed py-3 space-y-1">
@@ -339,47 +342,117 @@ export default function StaffDashboard() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-2 flex flex-col gap-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-black text-[#432419]">الإجمالي: {order.totalPrice} ر.س</span>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <div className="flex justify-between items-center font-black text-xs text-[#432419]">
+                      <span>الإجمالي: {order.totalPrice} ر.س</span>
                     </div>
                     {order.status !== 'completed' && (
-                      <Button 
-                        className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black"
-                        onClick={() => handleStatusChange(order.id, order.status)}
-                      >
-                        {order.status === 'pending' && "تجهيز الطلب"}
-                        {order.status === 'preparing' && "تم التجهيز (جاهز)"}
-                        {order.status === 'ready' && "تم التسليم (إكمال)"}
+                      <Button className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black shadow-md" onClick={() => handleStatusChange(order.id, order.status)}>
+                        تحديث إلى: {getStatusLabel(order.status === 'pending' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'completed')}
                       </Button>
                     )}
-                    {order.status === 'completed' && (
+                    {order.status === 'completed' && userRole === 'admin' && (
                       <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
-                        <Check className="h-4 w-4" /> تم التسليم بنجاح
+                        <Check className="h-4 w-4" /> طلب مكتمل
                       </div>
                     )}
                   </div>
                 </Card>
               ))}
-              {displayedOrders.length === 0 && (
-                <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
-                  <ShoppingBag className="h-12 w-12 text-[#432419]/20" />
-                  <p className="text-muted-foreground font-black">لا توجد طلبات نشطة حالياً</p>
-                </div>
-              )}
             </div>
           </TabsContent>
 
           {userRole === 'admin' && (
             <>
               <TabsContent value="products">
-                {/* نفس محتوى إدارة المنيو */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-black text-[#432419]">إدارة المنيو</h2>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-[#432419] text-white rounded-full font-black px-6">
+                        <PlusCircle className="ml-2 h-4 w-4" /> إضافة منتج
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md bg-[#F2E8D9] border-none rounded-[2rem]">
+                      <DialogHeader><DialogTitle className="text-right font-black">إضافة صنف جديد</DialogTitle></DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <Input placeholder="اسم المنتج" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="rounded-xl border-none h-12" />
+                        <Input placeholder="السعر" type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="rounded-xl border-none h-12" />
+                        <Select onValueChange={val => setNewProduct({...newProduct, category: val})}>
+                          <SelectTrigger className="rounded-xl border-none h-12 bg-white"><SelectValue placeholder="التصنيف" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="قهوة مختصة">قهوة مختصة</SelectItem>
+                            <SelectItem value="مشروبات باردة">مشروبات باردة</SelectItem>
+                            <SelectItem value="حلويات فاخرة">حلويات فاخرة</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input placeholder="رابط صورة المنتج (URL)" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="rounded-xl border-none h-12" />
+                        <Input placeholder="وصف المنتج" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="rounded-xl border-none h-12" />
+                        <Button onClick={handleAddProduct} className="w-full h-14 bg-[#432419] text-white rounded-xl font-black">حفظ المنتج</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {productsData?.map(product => (
+                    <Card key={product.id} className="luxury-card p-4 bg-white">
+                      <div className="relative h-32 rounded-xl overflow-hidden mb-3">
+                        <img src={product.image} className="w-full h-full object-cover" />
+                      </div>
+                      <h3 className="font-black text-sm mb-1">{product.name}</h3>
+                      <p className="text-[10px] text-slate-500 mb-3">{product.price} ر.س</p>
+                      <Button variant="destructive" size="sm" className="w-full rounded-lg h-9" onClick={() => handleDeleteProduct(product.id)}>
+                        <Trash2 className="ml-2 h-3.5 w-3.5" /> حذف
+                      </Button>
+                    </Card>
+                  ))}
+                </div>
               </TabsContent>
+
               <TabsContent value="staff">
-                {/* نفس محتوى إدارة الموظفين */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-black text-[#432419]">فريق العمل</h2>
+                  <Link href="/register-staff">
+                    <Button className="bg-[#432419] text-white rounded-full font-black px-6">
+                      <PlusCircle className="ml-2 h-4 w-4" /> إضافة موظف
+                    </Button>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {staffData?.map(member => (
+                    <Card key={member.uid} className="luxury-card p-4 bg-white flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#432419]/5 flex items-center justify-center text-[#432419] font-black">{member.displayName?.[0] || 'U'}</div>
+                        <div>
+                          <p className="font-black text-sm">{member.displayName}</p>
+                          <p className="text-[10px] text-slate-500">{member.email}</p>
+                        </div>
+                      </div>
+                      <Badge className={member.role === 'admin' ? 'bg-[#D48A5A]' : 'bg-[#432419]'}>{member.role === 'admin' ? 'مدير' : 'موظف'}</Badge>
+                    </Card>
+                  ))}
+                </div>
               </TabsContent>
+
               <TabsContent value="settings">
-                {/* نفس محتوى الإعدادات */}
+                <div className="max-w-md mx-auto">
+                  <Card className="luxury-card p-8 bg-white">
+                    <h2 className="text-xl font-black text-[#432419] mb-6 text-center">إعدادات التطبيق</h2>
+                    <form onSubmit={handleUpdateLogo} className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-black text-slate-500 uppercase">رابط الشعار الجديد (Logo URL)</Label>
+                        <Input name="logoUrl" placeholder="https://..." defaultValue={appSettings?.logoUrl} className="rounded-xl border-none bg-slate-50 h-12" required />
+                      </div>
+                      {appSettings?.logoUrl && (
+                        <div className="flex flex-col items-center gap-2">
+                          <p className="text-[10px] text-slate-400">الشعار الحالي:</p>
+                          <img src={appSettings.logoUrl} className="h-20 object-contain p-2 bg-slate-100 rounded-xl" />
+                        </div>
+                      )}
+                      <Button type="submit" className="w-full h-14 bg-[#432419] text-white rounded-xl font-black shadow-lg">تحديث الشعار</Button>
+                    </form>
+                  </Card>
+                </div>
               </TabsContent>
             </>
           )}
