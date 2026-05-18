@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -8,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Phone, Lock, User, AlertCircle } from "lucide-react";
+import { UserPlus, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -22,7 +23,7 @@ export default function RegisterStaffPage() {
   
   const [formData, setFormData] = useState({
     displayName: "",
-    phoneNumber: "",
+    email: "",
     password: "",
     secretCode: ""
   });
@@ -44,17 +45,15 @@ export default function RegisterStaffPage() {
 
     setLoading(true);
     try {
-      const email = `${formData.phoneNumber}@diamond.com`;
-      const result = await createUserWithEmailAndPassword(auth, email, formData.password);
+      const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = result.user;
 
       const userRef = doc(db, "users", user.uid);
       const userData = {
         uid: user.uid,
-        email: email,
+        email: formData.email,
         displayName: formData.displayName,
         role: "staff",
-        phoneNumber: formData.phoneNumber,
         createdAt: Date.now()
       };
 
@@ -80,7 +79,7 @@ export default function RegisterStaffPage() {
       let errorMessage = "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.";
       
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "رقم الجوال هذا مسجل مسبقاً. يرجى تسجيل الدخول أو استخدام رقم آخر.";
+        errorMessage = "البريد الإلكتروني مسجل مسبقاً. يرجى تسجيل الدخول أو استخدام بريد آخر.";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "كلمة المرور ضعيفة جداً، يرجى استخدام 6 أحرف على الأقل.";
       } else if (error.code === 'auth/operation-not-allowed') {
@@ -112,7 +111,7 @@ export default function RegisterStaffPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline font-black relative z-10">انضمام للفريق</CardTitle>
+          <CardTitle className="text-3xl font-headline font-black relative z-10 text-white">انضمام للفريق</CardTitle>
           <p className="text-white/70 mt-2 font-medium relative z-10">إضافة عضو جديد لعائلة Diamond</p>
         </CardHeader>
         <CardContent className="p-10">
@@ -132,14 +131,14 @@ export default function RegisterStaffPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-black text-[#432419] flex items-center gap-2">
-                <Phone className="h-4 w-4 text-[#D48A5A]" /> رقم الجوال
+                <Mail className="h-4 w-4 text-[#D48A5A]" /> البريد الإلكتروني
               </label>
               <Input 
-                placeholder="05xxxxxxxx" 
-                value={formData.phoneNumber}
-                onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                placeholder="example@diamond.com" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
                 required
-                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner text-left font-code"
+                className="h-14 rounded-2xl bg-[#432419]/5 border-none shadow-inner text-left font-medium"
                 dir="ltr"
               />
             </div>

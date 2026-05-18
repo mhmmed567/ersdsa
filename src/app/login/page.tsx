@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Lock, Phone, UserPlus, ArrowLeft } from "lucide-react";
+import { Lock, Mail, UserPlus, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +29,7 @@ export default function LoginPage() {
     
     setLoading(true);
     try {
-      const formattedEmail = phoneNumber.includes('@') ? phoneNumber : `${phoneNumber}@diamond.com`;
-      
-      const result = await signInWithEmailAndPassword(auth, formattedEmail, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user;
 
       const userRef = doc(db, "users", user.uid);
@@ -60,11 +58,10 @@ export default function LoginPage() {
         });
       }
     } catch (error: any) {
-      // التعامل مع خطأ بيانات الاعتماد غير الصالحة بشكل لبق
-      let errorMessage = "يرجى التأكد من رقم الجوال وكلمة المرور.";
+      let errorMessage = "يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
       
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        errorMessage = "رقم الجوال أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.";
+        errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
       } else if (error.code === 'auth/too-many-requests') {
         errorMessage = "محاولات كثيرة خاطئة. تم حظر الدخول مؤقتاً، يرجى المحاولة لاحقاً.";
       }
@@ -94,22 +91,22 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-xl font-headline font-black relative z-10 tracking-tight">دخول الموظفين</CardTitle>
+          <CardTitle className="text-xl font-headline font-black relative z-10 tracking-tight text-white">دخول الموظفين</CardTitle>
           <p className="text-white/60 text-xs mt-1 font-medium relative z-10">فريق Diamond المتميز</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
               <label className="text-[11px] font-black text-[#432419]/60 uppercase tracking-widest flex items-center gap-2 pr-1">
-                <Phone className="h-3 w-3 text-[#D48A5A]" /> رقم الجوال
+                <Mail className="h-3 w-3 text-[#D48A5A]" /> البريد الإلكتروني
               </label>
               <Input 
-                type="text"
-                placeholder="05xxxxxxxx" 
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                type="email"
+                placeholder="example@diamond.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner text-left font-code focus-visible:ring-1 focus-visible:ring-[#D48A5A]"
+                className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner text-left font-medium focus-visible:ring-1 focus-visible:ring-[#D48A5A]"
                 dir="ltr"
               />
             </div>
