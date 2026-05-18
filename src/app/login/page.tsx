@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Coffee, Lock, User } from "lucide-react";
+import { Coffee, Lock, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -18,7 +18,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +28,11 @@ export default function LoginPage() {
     
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      // في الخلفية نستخدم رقم الجوال كـ Email لإرضاء متطلبات Firebase Auth
+      // الموظف يدخل رقمه فقط دون الحاجة لإيميل
+      const formattedEmail = phoneNumber.includes('@') ? phoneNumber : `${phoneNumber}@diamond.com`;
+      
+      const result = await signInWithEmailAndPassword(auth, formattedEmail, password);
       const user = result.user;
 
       const userRef = doc(db, "users", user.uid);
@@ -49,7 +53,7 @@ export default function LoginPage() {
       } else {
         toast({
           title: "خطأ",
-          description: "لم يتم العثور على بيانات المستخدم.",
+          description: "لم يتم العثور على بيانات الموظف في النظام.",
           variant: "destructive"
         });
       }
@@ -57,7 +61,7 @@ export default function LoginPage() {
       console.error("Login Error:", error);
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "يرجى التأكد من البريد وكلمة المرور.",
+        description: "يرجى التأكد من رقم الجوال وكلمة المرور.",
         variant: "destructive"
       });
     } finally {
@@ -81,15 +85,16 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-primary flex items-center gap-2">
-                <User className="h-4 w-4" /> البريد الإلكتروني / رقم الجوال
+                <Phone className="h-4 w-4" /> رقم الجوال
               </label>
               <Input 
-                type="email"
-                placeholder="example@diamond.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="05xxxxxxxx" 
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-muted/50 border-none"
+                className="h-12 rounded-xl bg-muted/50 border-none text-left"
+                dir="ltr"
               />
             </div>
             
@@ -103,7 +108,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-muted/50 border-none"
+                className="h-12 rounded-xl bg-muted/50 border-none text-left"
+                dir="ltr"
               />
             </div>
 
@@ -112,11 +118,12 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-primary/20"
             >
-              {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+              {loading ? "جاري التحقق..." : "تسجيل الدخول"}
             </Button>
             
             <Button 
               variant="ghost" 
+              type="button"
               onClick={() => router.push("/menu")}
               className="w-full text-muted-foreground hover:text-primary"
             >
