@@ -18,12 +18,14 @@ export default function SplashScreen() {
   const logoSrc = appSettings?.logoUrl || "https://i.postimg.cc/zfhr8CtC/65774426-19fd-4c21-892e-81dba55d501b-removebg-preview.png";
 
   useEffect(() => {
+    // تقليل الوقت إلى ثانيتين (2000ms)
     const timer = setTimeout(() => {
       setIsVisible(false);
+      // الانتقال بعد انتهاء تأثير الاختفاء (0.5 ثانية بعد الاختفاء)
       setTimeout(() => {
         router.push('/menu');
-      }, 8000); // الانتقال بعد اكتمال التحميل
-    }, 4000); 
+      }, 500); 
+    }, 2000); 
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -65,7 +67,8 @@ export default function SplashScreen() {
           100% { transform: scaleX(1); }
         }
         .animate-loading-bar {
-          animation: loading-bar 3.5s ease-in-out forwards;
+          /* تم تعديل سرعة الأنيميشن لتتوافق مع الثانيتين */
+          animation: loading-bar 1.8s ease-in-out forwards;
         }
       `}</style>
     </div>
