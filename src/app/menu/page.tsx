@@ -1,3 +1,4 @@
+
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -57,20 +58,20 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-[#FDFCFB] pb-32">
       <Navbar />
       
-      <main className="container mx-auto px-4 mt-6">
+      <main className="container mx-auto px-3 mt-4">
         {/* Category Filters */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+              className={`whitespace-nowrap px-5 py-2 rounded-2xl text-[13px] font-bold transition-all ${
                 selectedCategory === cat 
-                  ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                  : "bg-white text-muted-foreground shadow-sm"
+                  ? "bg-primary text-white shadow-md shadow-primary/20" 
+                  : "bg-white text-muted-foreground shadow-sm border border-transparent"
               }`}
             >
               {cat}
@@ -78,38 +79,38 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Grid of Products */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {/* Grid of Products - 2 columns on mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="product-card group bg-white">
-              <div className="relative aspect-square w-full overflow-hidden p-3">
-                <div className="relative w-full h-full rounded-[2rem] overflow-hidden">
+            <Card key={item.id} className="rounded-[2rem] overflow-hidden border-none shadow-sm bg-white group transition-all active:scale-[0.98]">
+              <div className="relative aspect-square w-full p-2">
+                <div className="relative w-full h-full rounded-[1.8rem] overflow-hidden">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    data-ai-hint="coffee drink"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    data-ai-hint="coffee cup"
                   />
-                  <Badge className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-primary font-bold rounded-full px-3 py-1 text-xs border-none shadow-sm">
+                  <Badge className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm text-primary font-bold rounded-full px-2 py-0.5 text-[10px] border-none shadow-sm">
                     {item.price} ر.س
                   </Badge>
                 </div>
               </div>
-              <CardContent className="p-6 pt-0 text-right">
-                <div className="flex items-center gap-1 mb-1 justify-end">
-                  <span className="text-primary text-[10px]">•</span>
-                  <span className="text-primary text-[10px] font-bold">{item.category}</span>
+              <CardContent className="px-3 pb-3 pt-0 text-right">
+                <div className="flex items-center gap-1 mb-0.5 justify-end">
+                  <span className="text-primary text-[8px]">•</span>
+                  <span className="text-primary text-[9px] font-bold opacity-70 uppercase">{item.category}</span>
                 </div>
-                <h3 className="text-xl font-bold text-primary mb-4">{item.name}</h3>
+                <h3 className="text-sm font-bold text-[#1c1917] mb-3 truncate">{item.name}</h3>
                 
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full bg-[#1c1917] hover:bg-[#2d2a27] text-white rounded-full h-11 flex items-center justify-center gap-2 text-sm font-bold transition-all active:scale-95"
+                  className="w-full bg-[#1c1917] hover:bg-black text-white rounded-full h-9 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-all"
                 >
                   أضف للسلة
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3" />
                 </Button>
               </CardContent>
             </Card>

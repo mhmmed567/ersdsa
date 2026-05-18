@@ -1,28 +1,29 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 30% 98%;
+    --background: 30 40% 99%;
     --foreground: 20 45% 11%;
     --card: 0 0% 100%;
     --card-foreground: 20 45% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 45% 11%;
-    --primary: 25 50% 45%;
+    --primary: 25 55% 45%;
     --primary-foreground: 38 45% 96%;
     --secondary: 30 20% 94%;
     --secondary-foreground: 20 45% 11%;
     --muted: 30 20% 92%;
     --muted-foreground: 20 20% 45%;
-    --accent: 25 50% 45%;
+    --accent: 25 55% 45%;
     --accent-foreground: 38 45% 96%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 30 20% 90%;
     --input: 30 20% 90%;
-    --ring: 25 50% 45%;
+    --ring: 25 55% 45%;
     --radius: 1.5rem;
     --success: 169 72% 17%;
     --success-foreground: 38 45% 96%;
@@ -41,14 +42,18 @@
   }
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .product-card {
   @apply rounded-[2.5rem] overflow-hidden border-none shadow-sm transition-all duration-300 hover:shadow-md;
 }
 
 .category-pill {
   @apply rounded-full px-6 py-2 text-sm font-medium transition-all duration-200;
-}
-
-.search-bar {
-  @apply rounded-full bg-white border-none shadow-sm px-5 py-2 flex items-center gap-2 w-full max-w-md;
 }
