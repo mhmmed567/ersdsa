@@ -1,4 +1,3 @@
-
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAs-DEMO-KEY-FOR-DEVELOPMENT",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "diamond-cafe-demo.firebaseapp.com",

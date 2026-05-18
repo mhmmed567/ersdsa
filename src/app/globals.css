@@ -1,18 +1,17 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* الألوان المستخرجة بدقة من شعار دايموند المرفق */
-    --brand-dark-brown: 17 47% 18%;    /* #432419 - أغمق درجة في الشعار */
-    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E - لون القهوة المتوسط */
-    --brand-copper: 24 58% 59%;        /* #D48A5A - لون الخط المتوهج */
-    --brand-cream: 37 47% 91%;         /* #F2E8D9 - خلفية دافئة متناسقة */
-    --brand-charcoal: 0 0% 11%;        /* #1C1C1C - للتفاصيل السوداء */
+    /* Diamond Brand Colors - Exact HSL */
+    --brand-dark-brown: 17 47% 18%;    /* #432419 */
+    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
+    --brand-copper: 24 58% 59%;        /* #D48A5A */
+    --brand-cream: 37 47% 91%;         /* #F2E8D9 */
+    --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
 
-    --background: 37 47% 91%;          /* الكريمي الدافئ */
+    --background: var(--brand-cream);
     --foreground: var(--brand-dark-brown);
     
     --card: 0 0% 100%;
@@ -47,8 +46,7 @@
   }
 
   body {
-    @apply bg-[#F2E8D9] text-[#432419] font-body selection:bg-[#D48A5A]/30;
-    -webkit-font-smoothing: antialiased;
+    @apply bg-[#F2E8D9] text-[#432419] font-body selection:bg-[#D48A5A]/30 antialiased;
   }
 }
 
@@ -61,8 +59,8 @@
     @apply shadow-[0_25px_60px_rgba(67,36,25,0.12)] -translate-y-1.5 bg-white/90;
   }
 
-  .btn-modern {
-    @apply h-14 px-10 rounded-full font-black bg-[#432419] text-[#F2E8D9] transition-all duration-500 hover:bg-[#D48A5A] hover:shadow-2xl hover:shadow-[#D48A5A]/30 active:scale-95 flex items-center justify-center gap-3;
+  .glass-effect {
+    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-xl;
   }
 }
 
@@ -74,24 +72,4 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
-  .font-luxury {
-    @apply font-headline italic tracking-tighter;
-  }
-
-  .glass-effect {
-    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-xl;
-  }
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-[#D48A5A]/20 rounded-full hover:bg-[#D48A5A]/40 transition-colors;
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -12,7 +11,7 @@ import { useState, useEffect } from "react";
 const MENU_ITEMS: MenuItem[] = [
   {
     id: "1",
-    name: "v60 قهوة مختصة",
+    name: "V60 قهوة مختصة",
     price: 18,
     category: "قهوة مختصة",
     description: "محصول إثيوبي فاخر بنكهات فاكهية وقوام متزن.",
@@ -48,7 +47,7 @@ const MENU_ITEMS: MenuItem[] = [
     price: 20,
     category: "مشروبات باردة",
     description: "انتعاش القهوة مع الحليب المكثف والثلج.",
-    image: PlaceHolderImages.find(img => img.id === 'herbal-tea')?.imageUrl || "https://picsum.photos/seed/ice/600/400",
+    image: "https://picsum.photos/seed/ice/600/400",
   }
 ];
 
@@ -74,27 +73,27 @@ export default function MenuPage() {
       <main className={`container mx-auto px-4 pt-6 transition-all duration-1000 ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
         {/* Modern Hero Section */}
-        <section className="mb-12 relative h-48 rounded-[3rem] overflow-hidden shadow-2xl group">
+        <section className="mb-12 relative h-56 rounded-[3rem] overflow-hidden shadow-2xl group">
           <Image 
             src={PlaceHolderImages.find(img => img.id === 'warm-interior')?.imageUrl || ""} 
             alt="Diamond Interior"
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#432419]/90 to-transparent flex items-center pr-8">
-            <div className="space-y-2">
+          <div className="absolute inset-0 bg-gradient-to-l from-[#432419]/90 to-transparent flex items-center pr-10">
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-[#D48A5A]">
                 <Star className="h-4 w-4 fill-current" />
-                <span className="text-[10px] font-black uppercase tracking-widest">الأكثر طلباً هذا الأسبوع</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">الأكثر طلباً</span>
               </div>
-              <h2 className="text-3xl font-black text-white">V60 كولومبي</h2>
-              <p className="text-white/70 text-sm max-w-[200px]">تجربة غنية بالمذاق تبدأ من هنا</p>
+              <h2 className="text-4xl font-black text-white">V60 كولومبي</h2>
+              <p className="text-white/80 text-sm max-w-[250px] leading-relaxed">تجربة غنية بالمذاق تبدأ من أجود المحاصيل المختارة بعناية.</p>
             </div>
           </div>
         </section>
 
-        {/* Categories */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-8 no-scrollbar scroll-smooth">
+        {/* Categories Bar */}
+        <div className="flex items-center gap-4 overflow-x-auto pb-8 no-scrollbar scroll-smooth">
           {CATEGORIES.map((cat, idx) => (
             <button
               key={cat}
@@ -102,7 +101,7 @@ export default function MenuPage() {
               style={{ animationDelay: `${idx * 100}ms` }}
               className={`whitespace-nowrap px-8 py-4 rounded-[2rem] text-sm font-black transition-all duration-500 animate-in fade-in slide-in-from-right-4 ${
                 selectedCategory === cat 
-                  ? "bg-[#432419] text-[#F2E8D9] shadow-xl shadow-[#432419]/20 scale-105" 
+                  ? "bg-[#432419] text-[#F2E8D9] shadow-2xl shadow-[#432419]/30 scale-105" 
                   : "bg-white/50 backdrop-blur-sm text-[#432419]/60 hover:text-[#432419] shadow-sm hover:shadow-md"
               }`}
             >
@@ -111,15 +110,15 @@ export default function MenuPage() {
           ))}
         </div>
 
-        {/* Menu Grid */}
-        <div className="space-y-6">
+        {/* Menu Grid - Modern Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredItems.map((item, idx) => (
             <div 
               key={item.id} 
               style={{ animationDelay: `${idx * 150}ms` }}
-              className="group luxury-card flex items-center p-3 animate-in fade-in slide-in-from-bottom-8 duration-700"
+              className="group luxury-card flex p-4 animate-in fade-in slide-in-from-bottom-8 duration-700"
             >
-              <div className="relative h-28 w-28 rounded-[2rem] overflow-hidden flex-shrink-0 shadow-lg border-2 border-white/20">
+              <div className="relative h-32 w-32 rounded-[2.5rem] overflow-hidden flex-shrink-0 shadow-xl border-2 border-white/40">
                 <Image
                   src={item.image}
                   alt={item.name}
@@ -128,29 +127,32 @@ export default function MenuPage() {
                 />
               </div>
               
-              <div className="mr-6 flex-grow py-2">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-black text-[#432419] group-hover:text-[#D48A5A] transition-colors">
-                    {item.name}
-                  </h3>
-                  <span className="text-sm font-black text-[#D48A5A] whitespace-nowrap bg-white/80 px-3 py-1 rounded-full shadow-sm">
-                    {item.price} ر.س
-                  </span>
+              <div className="mr-6 flex-grow flex flex-col justify-between py-1">
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-black text-[#432419] group-hover:text-[#D48A5A] transition-colors leading-tight">
+                      {item.name}
+                    </h3>
+                    <span className="text-sm font-black text-[#D48A5A] bg-white px-4 py-1.5 rounded-full shadow-sm">
+                      {item.price} ر.س
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#8B4E2E]/70 line-clamp-2 leading-relaxed mb-4">
+                    {item.description}
+                  </p>
                 </div>
-                <p className="text-xs text-[#8B4E2E]/60 line-clamp-2 mb-4 max-w-[200px] leading-relaxed">
-                  {item.description}
-                </p>
+
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-[10px] text-[#8B4E2E]/40 font-bold">
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> 10-15 دقيقة</span>
-                    <span className="flex items-center gap-1"><Sparkles className="h-3 w-3" /> مميز</span>
+                  <div className="flex items-center gap-4 text-[10px] text-[#8B4E2E]/50 font-black uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> 15m</span>
+                    <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Premium</span>
                   </div>
                   <Button 
                     onClick={() => addToCart(item)}
                     size="sm"
-                    className="bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl h-10 w-10 p-0 shadow-lg active:scale-95 transition-all"
+                    className="bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl h-11 w-11 p-0 shadow-xl active:scale-95 transition-all"
                   >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-6 w-6" />
                   </Button>
                 </div>
               </div>

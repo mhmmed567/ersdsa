@@ -1,4 +1,3 @@
-
 import { EventEmitter } from 'events';
 
 class ErrorEmitter extends EventEmitter {}
