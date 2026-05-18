@@ -3,7 +3,6 @@
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import Image from "next/image";
@@ -15,7 +14,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     id: "1",
     name: "v60",
-    price: 1.2,
+    price: 18,
     category: "قهوة مختصة",
     description: "قهوة مختصة محضرة بعناية فائقة لاستخراج أفضل النكهات.",
     image: PlaceHolderImages.find(img => img.id === 'coffee-latte')?.imageUrl || "",
@@ -57,20 +56,20 @@ export default function MenuPage() {
     : MENU_ITEMS.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-[#faf7f2] pb-32">
       <Navbar />
       
-      <main className="container mx-auto px-3 mt-4">
+      <main className="container mx-auto px-4 mt-6">
         {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+        <div className="flex items-center gap-3 overflow-x-auto pb-6 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-5 py-2 rounded-2xl text-[13px] font-bold transition-all ${
+              className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
                 selectedCategory === cat 
-                  ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                  : "bg-card text-muted-foreground border border-white/5"
+                  ? "bg-[#2a1810] text-[#faf7f2] shadow-xl shadow-[#2a1810]/20 scale-105" 
+                  : "bg-white/50 text-[#5c3a28] border border-[#2a1810]/5 hover:bg-white"
               }`}
             >
               {cat}
@@ -79,40 +78,39 @@ export default function MenuPage() {
         </div>
 
         {/* Grid of Products - 2 columns on mobile */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="rounded-[2.5rem] overflow-hidden border-none shadow-xl bg-card group transition-all active:scale-[0.98]">
-              <div className="relative aspect-square w-full p-2">
-                <div className="relative w-full h-full rounded-[2.2rem] overflow-hidden">
+            <div key={item.id} className="luxury-card group stagger-1 animate-scale-in">
+              <div className="relative aspect-square w-full p-2.5">
+                <div className="relative w-full h-full rounded-[2rem] overflow-hidden">
                   <Image
                     src={item.image}
                     alt={item.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110 opacity-90"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 768px) 50vw, 25vw"
                     data-ai-hint="coffee cup"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <Badge className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-white font-bold rounded-full px-2.5 py-0.5 text-[10px] border-none shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2a1810]/60 to-transparent" />
+                  <div className="absolute top-3 left-3 bg-[#c07446] text-white font-bold rounded-full px-3 py-1 text-[11px] shadow-lg border border-white/20">
                     {item.price} ر.س
-                  </Badge>
+                  </div>
                 </div>
               </div>
-              <CardContent className="px-3 pb-3 pt-1 text-right">
-                <div className="flex items-center gap-1 mb-1 justify-end">
-                  <span className="text-primary text-[10px] font-bold opacity-80 uppercase tracking-tighter">{item.category}</span>
-                </div>
-                <h3 className="text-[13px] font-bold text-foreground mb-3 truncate px-1">{item.name}</h3>
+              
+              <div className="px-4 pb-4 pt-1 text-right">
+                <span className="text-[#c07446] text-[10px] font-bold uppercase tracking-widest">{item.category}</span>
+                <h3 className="text-[14px] font-bold text-[#2a1810] mb-4 truncate font-luxury">{item.name}</h3>
                 
                 <Button 
                   onClick={() => addToCart(item)}
-                  className="w-full premium-gradient hover:opacity-90 text-white rounded-full h-9 flex items-center justify-center gap-1.5 text-[11px] font-bold transition-all shadow-md shadow-primary/20 border-none"
+                  className="w-full bg-[#2a1810] hover:bg-[#5c3a28] text-[#faf7f2] rounded-full h-10 flex items-center justify-center gap-2 text-[11px] font-bold transition-all shadow-md active:scale-95"
                 >
                   أضف للسلة
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-4 w-4" />
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </main>

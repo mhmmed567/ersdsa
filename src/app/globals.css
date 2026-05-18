@@ -4,63 +4,94 @@
 
 @layer base {
   :root {
-    --background: 40 30% 98%;
-    --foreground: 20 20% 15%;
+    --background: 38 25% 97%; /* #faf7f2 */
+    --foreground: 20 20% 10%; /* #2a1810 */
     --card: 0 0% 100%;
-    --card-foreground: 20 20% 15%;
+    --card-foreground: 20 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 20% 15%;
-    --primary: 18 65% 45%;
-    --primary-foreground: 40 30% 98%;
-    --secondary: 35 25% 94%;
-    --secondary-foreground: 20 20% 15%;
-    --muted: 35 20% 90%;
+    --popover-foreground: 20 20% 10%;
+    --primary: 19 45% 11%; /* #2a1810 */
+    --primary-foreground: 38 25% 97%;
+    --secondary: 30 50% 64%; /* #d4a373 */
+    --secondary-foreground: 20 20% 10%;
+    --muted: 35 20% 92%;
     --muted-foreground: 20 10% 45%;
-    --accent: 18 75% 55%;
-    --accent-foreground: 40 30% 98%;
+    --accent: 22 50% 51%; /* #c07446 */
+    --accent-foreground: 38 25% 97%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 35 15% 85%;
     --input: 35 15% 85%;
-    --ring: 18 65% 45%;
-    --radius: 1.5rem;
+    --ring: 22 50% 51%;
+    --radius: 2rem;
     --success: 160 80% 30%;
-    --success-foreground: 40 30% 98%;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-[#faf7f2] text-[#1a1a1a] font-body;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline;
+
+  h1, h2, h3, .font-luxury {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: -0.01em;
   }
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+@layer components {
+  .luxury-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(42,24,16,0.08)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
+  }
+
+  .luxury-card:hover {
+    @apply shadow-[0_20px_48px_rgba(42,24,16,0.12)] -translate-y-1;
+  }
+
+  .btn-luxury {
+    @apply px-8 py-3 rounded-full font-bold bg-[#2a1810] text-[#faf7f2] transition-all duration-300 hover:shadow-2xl hover:shadow-[#2a1810]/20 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-outline-luxury {
+    @apply px-8 py-3 rounded-full font-bold border-2 border-[#2a1810] text-[#2a1810] transition-all duration-300 hover:bg-[#2a1810] hover:text-[#faf7f2] active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .glass-header {
+    @apply sticky top-0 z-50 bg-[#faf7f2]/80 backdrop-blur-md border-b border-[#2a1810]/5;
+  }
 }
 
-.product-card {
-  @apply rounded-[2.5rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-300 hover:shadow-primary/5;
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .bg-coffee-gradient {
+    background: radial-gradient(circle at top right, #5c3a28 0%, #2a1810 100%);
+  }
+
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1;
+  }
 }
 
-.category-pill {
-  @apply rounded-full px-6 py-2 text-sm font-medium transition-all duration-200;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.premium-gradient {
-  background: linear-gradient(135deg, hsl(18, 65%, 45%) 0%, hsl(22, 75%, 55%) 100%);
+::-webkit-scrollbar-track {
+  background: #faf7f2;
 }
 
-.premium-card-gradient {
-  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(245,245,240,0.5) 100%);
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c07446 0%, #5c3a28 100%);
+  border-radius: 4px;
 }
