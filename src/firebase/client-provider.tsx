@@ -11,12 +11,15 @@ export const FirebaseClientProvider: React.FC<{
   const [services, setServices] = useState<ReturnType<typeof initializeFirebase> | null>(null);
 
   useEffect(() => {
-    // Initialize only on the client after hydration
-    setServices(initializeFirebase());
+    // Initialize only on the client after initial mount to avoid hydration mismatches
+    const initializedServices = initializeFirebase();
+    if (initializedServices.firebaseApp) {
+      setServices(initializedServices);
+    }
   }, []);
 
   if (!services || !services.firebaseApp) {
-    // Return a minimal structure or null during initial client mount to avoid hydration errors
+    // Show a consistent background color during initial load
     return <div className="min-h-screen bg-[#F2E8D9]" />;
   }
 
