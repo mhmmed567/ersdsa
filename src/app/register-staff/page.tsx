@@ -39,35 +39,45 @@ export default function RegisterStaffPage() {
       const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = result.user;
 
-      // 2. إعداد بيانات المستخدم بصلاحية "staff" (مسؤول)
+      // 2. تجهيز بيانات المستخدم مع الصلاحية المطلوبة
       const userRef = doc(db, "users", user.uid);
       const userData = {
         uid: user.uid,
         email: formData.email,
         displayName: formData.displayName,
-        role: "staff", // منح صلاحية المسؤول تلقائياً كما طلبت
+        role: "staff", // تعيين صلاحية المسؤول بشكل صريح
         createdAt: Date.now()
       };
 
-      // 3. حفظ البيانات في Firestore قبل التوجيه
-      await setDoc(userRef, userData);
+      // 3. استخدام await لضمان الحفظ في Firestore قبل الانتقال
+      await setDoc(userRef, userData).catch((err) => {
+        // إذا فشل Firestore، نرسل خطأ مخصص للتعامل معه
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'create',
+          requestResourceData: userData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        throw err;
+      });
 
       toast({
-        title: "تم التسجيل بنجاح",
-        description: "أهلاً بك في فريق دايموند. تم منحك صلاحيات المسؤول كاملة.",
+        title: "تم إنشاء الحساب بنجاح",
+        description: `مرحباً بك يا ${formData.displayName}. لقد تم منحك صلاحيات المسؤول.`,
       });
       
-      // التوجه مباشرة للوحة التحكم
+      // التوجه للوحة التحكم بعد التأكد من الحفظ
       router.push("/staff");
     } catch (error: any) {
-      let errorMessage = "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.";
+      console.error("Registration error:", error);
+      let errorMessage = "حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.";
       
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "البريد الإلكتروني مسجل مسبقاً. يرجى تسجيل الدخول.";
+        errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً.";
       } else if (error.code === 'auth/weak-password') {
-        errorMessage = "كلمة المرور ضعيفة جداً، يرجى استخدام 6 أحرف على الأقل.";
-      } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "يرجى تفعيل خيار Email/Password من لوحة تحكم Firebase.";
+        errorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
+      } else if (error.message.includes('permission')) {
+        errorMessage = "خطأ في تصاريح قاعدة البيانات، يرجى التحقق من قواعد الأمان.";
       }
 
       toast({
@@ -75,15 +85,6 @@ export default function RegisterStaffPage() {
         description: errorMessage,
         variant: "destructive"
       });
-      
-      // إذا حدث خطأ في Firestore ولكن تم إنشاء الحساب في Auth
-      if (error.name === 'FirestorePermissionError' || error.message.includes('permission')) {
-        const permissionError = new FirestorePermissionError({
-          path: `users/${auth.currentUser?.uid}`,
-          operation: 'create',
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +157,7 @@ export default function RegisterStaffPage() {
               disabled={loading}
               className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl mt-6 active:scale-95"
             >
-              {loading ? "جاري إنشاء الحساب..." : "إنشاء حساب المسؤول"}
+              {loading ? "جاري إنشاء الحساب وحفظ الصلاحيات..." : "إنشاء حساب المسؤول"}
             </Button>
             
             <div className="flex flex-col gap-2 pt-2">

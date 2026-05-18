@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -5,21 +6,24 @@ service cloud.firestore {
     
     // قواعد ملفات المستخدمين
     match /users/{userId} {
-      // السماح للمستخدم المسجل بقراءة وكتابة ملفه الخاص
-      allow read: if request.auth != null;
+      // السماح للمستخدم المسجل بقراءة ملفه الخاص
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // السماح للموظفين بقراءة ملفات المستخدمين الآخرين للتحقق من الصلاحيات
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
+      
+      // السماح للمستخدم بإنشاء ملفه الشخصي وتحديثه
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // قواعد الطلبات
     match /orders/{orderId} {
-      // السماح لأي شخص بإنشاء طلب (للزبائن)
+      // السماح لأي شخص بإنشاء طلب (للزبائن والضيوف)
       allow create: if true;
       
       // السماح للمسؤولين فقط بقراءة وتحديث الطلبات
-      // تم تبسيط القاعدة لضمان عدم حدوث أخطاء Permission أثناء التحقق
       allow read, update: if request.auth != null && 
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff' || 
-         exists(/databases/$(database)/documents/users/$(request.auth.uid)) == false);
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
       
       allow delete: if false;
     }
