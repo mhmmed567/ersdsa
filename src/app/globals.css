@@ -1,17 +1,18 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Diamond Brand Colors Palette */
+    /* Diamond Identity Palette */
     --brand-dark-brown: 17 47% 18%;    /* #432419 */
     --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
     --brand-copper: 24 58% 59%;        /* #D48A5A */
     --brand-cream: 37 47% 91%;         /* #F2E8D9 */
     --brand-charcoal: 0 0% 11%;        /* #1C1C1C */
 
-    --background: 37 47% 95%;          /* Softer Cream */
+    --background: 37 47% 91%;          /* Soft Cream */
     --foreground: var(--brand-dark-brown);
     
     --card: 0 0% 100%;
@@ -20,13 +21,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: var(--brand-dark-brown);
     
-    --primary: var(--brand-copper);
-    --primary-foreground: 0 0% 100%;
+    --primary: var(--brand-dark-brown);
+    --primary-foreground: var(--brand-cream);
     
-    --secondary: var(--brand-dark-brown);
-    --secondary-foreground: var(--brand-cream);
+    --secondary: var(--brand-copper);
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 37 30% 90%;
+    --muted: 37 30% 85%;
     --muted-foreground: 17 47% 40%;
     
     --accent: var(--brand-copper);
@@ -34,35 +35,34 @@
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 355 100% 100%;
     
-    --border: 17 47% 85%;
-    --input: 17 47% 85%;
+    --border: 17 47% 80%;
+    --input: 17 47% 80%;
     --ring: var(--brand-copper);
     
-    --radius: 1.5rem;
+    --radius: 2.5rem;
   }
 
   body {
-    @apply bg-[#F7F3ED] text-[#432419] font-body selection:bg-[#D48A5A]/30;
+    @apply bg-[#F2E8D9] text-[#432419] font-body selection:bg-[#D48A5A]/30;
     -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
-  .modern-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_10px_30px_rgba(67,36,25,0.04)] rounded-[2rem] transition-all duration-500 overflow-hidden;
+  .luxury-card {
+    @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-[0_15px_40px_rgba(67,36,25,0.05)] rounded-[2.5rem] transition-all duration-500 overflow-hidden;
   }
 
-  .modern-card:hover {
-    @apply shadow-[0_20px_50px_rgba(67,36,25,0.08)] -translate-y-1.5;
+  .luxury-card:hover {
+    @apply shadow-[0_25px_60px_rgba(67,36,25,0.12)] -translate-y-1.5 bg-white/90;
   }
 
   .btn-modern {
-    @apply h-12 px-8 rounded-full font-bold bg-[#432419] text-[#F2E8D9] transition-all duration-300 hover:bg-[#D48A5A] hover:shadow-lg hover:shadow-[#D48A5A]/20 active:scale-95 flex items-center justify-center gap-2;
-  }
-
-  .glass-nav {
-    @apply sticky top-4 z-50 mx-4 bg-white/70 backdrop-blur-lg border border-white/40 shadow-lg rounded-full;
+    @apply h-14 px-10 rounded-full font-black bg-[#432419] text-[#F2E8D9] transition-all duration-500 hover:bg-[#D48A5A] hover:shadow-2xl hover:shadow-[#D48A5A]/30 active:scale-95 flex items-center justify-center gap-3;
   }
 }
 
@@ -75,21 +75,17 @@
     scrollbar-width: none;
   }
   
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#432419] to-[#D48A5A];
+  .font-luxury {
+    @apply font-headline italic tracking-tighter;
   }
 
-  .image-zoom {
-    @apply overflow-hidden;
-  }
-  
-  .image-zoom img {
-    @apply transition-transform duration-700 hover:scale-110;
+  .glass-effect {
+    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-xl;
   }
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -97,5 +93,5 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-[#D48A5A]/30 rounded-full hover:bg-[#D48A5A]/50 transition-colors;
+  @apply bg-[#D48A5A]/20 rounded-full hover:bg-[#D48A5A]/40 transition-colors;
 }
