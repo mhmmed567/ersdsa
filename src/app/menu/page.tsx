@@ -6,7 +6,6 @@ import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Plus, Sparkles, Star, Clock, Coffee } from "lucide-react";
 import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useState, useEffect } from "react";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
@@ -40,27 +39,8 @@ export default function MenuPage() {
       
       <main className={`container mx-auto px-3 sm:px-4 pt-4 transition-all duration-1000 ${isMounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
-        <section className="mb-6 relative h-40 sm:h-56 rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-lg group">
-          <Image 
-            src={PlaceHolderImages.find(img => img.id === 'warm-interior')?.imageUrl || ""} 
-            alt="Diamond Interior"
-            fill
-            className="object-cover transition-transform duration-1000 group-hover:scale-110"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-[#432419] via-[#432419]/40 to-transparent flex items-center pr-6 sm:pr-10">
-            <div className="space-y-1 sm:space-y-3 text-right">
-              <div className="flex items-center gap-1.5 text-[#D48A5A] justify-end">
-                <span className="text-[8px] font-black uppercase tracking-widest">Diamond Exclusive</span>
-                <Star className="h-3 w-3 fill-current" />
-              </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">مذاق لا ينسى</h2>
-              <p className="text-white/80 text-[10px] sm:text-xs max-w-[150px] sm:max-w-[250px] leading-relaxed font-medium">نستخلص لك السعادة في كل كوب.</p>
-            </div>
-          </div>
-        </section>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar" dir="rtl">
+        {/* Category Selector */}
+        <div className="flex items-center gap-2 overflow-x-auto mb-6 no-scrollbar" dir="rtl">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
