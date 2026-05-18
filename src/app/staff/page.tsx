@@ -21,22 +21,9 @@ export default function StaffDashboard() {
   const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
-  const [isStaff, setIsStaff] = useState<boolean | null>(null);
+  const [isStaffConfirmed, setIsStaffConfirmed] = useState<boolean | null>(null);
 
-  // Orders Query - stabilized with useMemoFirebase
-  const ordersQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(collection(db, "orders"), orderBy("createdAt", "desc"));
-  }, [db]);
-  const { data: ordersData } = useCollection<Order>(ordersQuery);
-
-  // Products Query - stabilized with useMemoFirebase
-  const productsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(collection(db, "products"), orderBy("createdAt", "desc"));
-  }, [db]);
-  const { data: productsData } = useCollection<MenuItem>(productsQuery);
-
+  // التحقق من الصلاحيات قبل عرض أي شيء
   useEffect(() => {
     const checkRole = async () => {
       if (!user) {
@@ -47,18 +34,47 @@ export default function StaffDashboard() {
         const userRef = doc(db!, "users", user.uid);
         const userDoc = await getDoc(userRef);
         if (userDoc.exists() && userDoc.data().role === "staff") {
-          setIsStaff(true);
+          setIsStaffConfirmed(true);
         } else {
-          setIsStaff(false);
+          setIsStaffConfirmed(false);
           router.push("/menu");
         }
       } catch (e) {
-        setIsStaff(false);
-        router.push("/menu");
+        console.error("Permission check failed:", e);
+        // محاولة ثانية بسيطة لتلافي تأخر المزامنة عند التسجيل الجديد
+        setTimeout(async () => {
+          try {
+            const userRef = doc(db!, "users", user.uid);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists() && userDoc.data().role === "staff") {
+              setIsStaffConfirmed(true);
+            } else {
+              setIsStaffConfirmed(false);
+              router.push("/menu");
+            }
+          } catch {
+            setIsStaffConfirmed(false);
+            router.push("/menu");
+          }
+        }, 1500);
       }
     };
     if (!userLoading && db) checkRole();
   }, [user, userLoading, db, router]);
+
+  // استعلام الطلبات - لا يتم إلا بعد تأكيد الصلاحية
+  const ordersQuery = useMemoFirebase(() => {
+    if (!db || !isStaffConfirmed) return null;
+    return query(collection(db, "orders"), orderBy("createdAt", "desc"));
+  }, [db, isStaffConfirmed]);
+  const { data: ordersData } = useCollection<Order>(ordersQuery);
+
+  // استعلام المنتجات - لا يتم إلا بعد تأكيد الصلاحية
+  const productsQuery = useMemoFirebase(() => {
+    if (!db || !isStaffConfirmed) return null;
+    return query(collection(db, "products"), orderBy("createdAt", "desc"));
+  }, [db, isStaffConfirmed]);
+  const { data: productsData } = useCollection<MenuItem>(productsQuery);
 
   const handleStatusChange = async (orderId: string, currentStatus: Order['status']) => {
     const statuses: Order['status'][] = ['pending', 'preparing', 'ready', 'completed'];
@@ -102,8 +118,15 @@ export default function StaffDashboard() {
     deleteDoc(doc(db, "products", id));
   };
 
-  if (userLoading || isStaff === null) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]"><div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full" /></div>;
+  if (userLoading || isStaffConfirmed === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-12 w-12 border-4 border-[#432419] border-t-transparent rounded-full" />
+          <p className="font-black text-[#432419]/60 text-sm">جاري التحقق من صلاحيات المسؤول...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -130,31 +153,38 @@ export default function StaffDashboard() {
           </TabsList>
 
           <TabsContent value="orders">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ordersData?.map((order) => (
-                <Card key={order.id} className="luxury-card p-6 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-black text-lg">{order.customerName}</h3>
-                    <Badge className="bg-[#D48A5A]">{order.status}</Badge>
-                  </div>
-                  <div className="text-xs space-y-1 opacity-70">
-                    <p className="flex items-center gap-2"><Phone className="h-3 w-3" /> {order.customerPhoneNumber}</p>
-                    <p className="flex items-center gap-2"><Car className="h-3 w-3" /> {order.carType} - {order.carLicensePlate}</p>
-                  </div>
-                  <div className="border-t pt-2">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span>{item.price * item.quantity} ر.س</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button className="flex-1 bg-[#432419]" onClick={() => handleStatusChange(order.id, order.status)}>تحديث الحالة</Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            {ordersData?.length === 0 ? (
+              <div className="text-center py-20 bg-white/30 rounded-[2.5rem] border border-dashed border-[#432419]/20">
+                <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-[#432419]/20" />
+                <p className="text-[#432419]/60 font-bold">لا توجد طلبات حالية</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {ordersData?.map((order) => (
+                  <Card key={order.id} className="luxury-card p-6 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-black text-lg">{order.customerName}</h3>
+                      <Badge className="bg-[#D48A5A]">{order.status}</Badge>
+                    </div>
+                    <div className="text-xs space-y-1 opacity-70">
+                      <p className="flex items-center gap-2"><Phone className="h-3 w-3" /> {order.customerPhoneNumber}</p>
+                      <p className="flex items-center gap-2"><Car className="h-3 w-3" /> {order.carType} - {order.carLicensePlate}</p>
+                    </div>
+                    <div className="border-t pt-2">
+                      {order.items.map((item, i) => (
+                        <div key={i} className="flex justify-between text-sm">
+                          <span>{item.quantity}x {item.name}</span>
+                          <span>{item.price * item.quantity} ر.س</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button className="flex-1 bg-[#432419]" onClick={() => handleStatusChange(order.id, order.status)}>تحديث الحالة</Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="products">

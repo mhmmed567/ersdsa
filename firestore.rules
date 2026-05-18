@@ -4,28 +4,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // وظيفة للتحقق من تسجيل الدخول
     function isSignedIn() {
       return request.auth != null;
     }
 
+    // وظيفة للتحقق من صلاحية المسؤول
     function isStaff() {
       return isSignedIn() && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'staff';
     }
 
+    // قواعد المستخدمين
     match /users/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
-      allow read: if isStaff();
+      allow read: if isSignedIn(); // السماح للمسؤولين وغيرهم بقراءة البيانات الأساسية عند الحاجة
     }
 
+    // قواعد المنتجات (المنيو)
     match /products/{productId} {
-      allow read: if true;
-      allow write: if isStaff();
+      allow read: if true; // الجميع يقرأ المنيو
+      allow write: if isStaff(); // المسؤول فقط يضيف أو يعدل
     }
 
+    // قواعد الطلبات
     match /orders/{orderId} {
-      allow create: if true;
-      allow read, update, delete: if isStaff();
+      allow create: if true; // الزبائن ينشئون طلبات
+      allow read, update, delete: if isStaff(); // المسؤول فقط يديرها
     }
   }
 }
