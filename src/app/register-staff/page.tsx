@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Mail, Lock, User } from "lucide-react";
+import { UserPlus, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -35,19 +35,22 @@ export default function RegisterStaffPage() {
     
     setLoading(true);
     try {
+      // 1. إنشاء الحساب في Firebase Auth
       const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = result.user;
 
+      // 2. إعداد بيانات المستخدم بصلاحية "staff" (مسؤول)
       const userRef = doc(db, "users", user.uid);
       const userData = {
         uid: user.uid,
         email: formData.email,
         displayName: formData.displayName,
-        role: "staff",
+        role: "staff", // منح صلاحية المسؤول تلقائياً
         createdAt: Date.now()
       };
 
-      setDoc(userRef, userData)
+      // 3. حفظ البيانات في Firestore
+      await setDoc(userRef, userData)
         .catch(async (error) => {
           const permissionError = new FirestorePermissionError({
             path: userRef.path,
@@ -55,13 +58,15 @@ export default function RegisterStaffPage() {
             requestResourceData: userData,
           } satisfies SecurityRuleContext);
           errorEmitter.emit('permission-error', permissionError);
+          throw error;
         });
 
       toast({
         title: "تم التسجيل بنجاح",
-        description: "أهلاً بك في فريق دايموند، تم إنشاء حسابك بنجاح.",
+        description: "أهلاً بك في فريق دايموند كمسؤول نظام. تم منحك الصلاحيات الكاملة.",
       });
       
+      // التوجه مباشرة للوحة التحكم
       router.push("/staff");
     } catch (error: any) {
       console.error("Registration Error:", error);
@@ -69,11 +74,11 @@ export default function RegisterStaffPage() {
       let errorMessage = "فشل في إنشاء الحساب، يرجى المحاولة لاحقاً.";
       
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "البريد الإلكتروني مسجل مسبقاً. يرجى تسجيل الدخول أو استخدام بريد آخر.";
+        errorMessage = "البريد الإلكتروني مسجل مسبقاً. يرجى تسجيل الدخول.";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "كلمة المرور ضعيفة جداً، يرجى استخدام 6 أحرف على الأقل.";
       } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "خدمة التسجيل معطلة حالياً، يرجى التأكد من تفعيل Email/Password في Firebase.";
+        errorMessage = "خدمة التسجيل بالبريد معطلة في إعدادات Firebase.";
       }
 
       toast({
@@ -101,17 +106,17 @@ export default function RegisterStaffPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-3xl font-headline font-black relative z-10 text-white">انضمام للفريق</CardTitle>
-          <p className="text-white/70 mt-2 font-medium relative z-10">إضافة عضو جديد لعائلة Diamond</p>
+          <CardTitle className="text-3xl font-headline font-black relative z-10 text-white">تسجيل مسؤول</CardTitle>
+          <p className="text-white/70 mt-2 font-medium relative z-10">إنشاء حساب بصلاحيات إدارة النظام</p>
         </CardHeader>
         <CardContent className="p-10">
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-black text-[#432419] flex items-center gap-2">
-                <User className="h-4 w-4 text-[#D48A5A]" /> اسم المسؤول
+                <User className="h-4 w-4 text-[#D48A5A]" /> الاسم الكامل
               </label>
               <Input 
-                placeholder="الاسم الكامل" 
+                placeholder="الاسم الكريم" 
                 value={formData.displayName}
                 onChange={(e) => setFormData({...formData, displayName: e.target.value})}
                 required
@@ -153,17 +158,27 @@ export default function RegisterStaffPage() {
               disabled={loading}
               className="w-full h-16 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-2xl font-black text-lg transition-all shadow-2xl mt-6 active:scale-95"
             >
-              {loading ? "جاري المعالجة..." : "تفعيل حساب الموظف"}
+              {loading ? "جاري إنشاء الحساب..." : "إنشاء حساب المسؤول"}
             </Button>
             
-            <Button 
-              variant="ghost" 
-              type="button"
-              onClick={() => router.push("/login")}
-              className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl mt-2"
-            >
-              هل تملك حساباً؟ سجل دخولك من هنا
-            </Button>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button 
+                variant="ghost" 
+                type="button"
+                onClick={() => router.push("/login")}
+                className="w-full text-[#8B4E2E] font-bold h-12 hover:bg-[#432419]/5 rounded-xl"
+              >
+                هل تملك حساباً؟ سجل دخولك
+              </Button>
+              <Button 
+                variant="ghost" 
+                type="button"
+                onClick={() => router.push("/menu")}
+                className="w-full text-[#432419]/40 font-bold h-10 hover:bg-transparent"
+              >
+                <ArrowLeft className="ml-2 h-4 w-4" /> العودة للقائمة
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

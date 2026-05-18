@@ -39,35 +39,35 @@ export default function LoginPage() {
         const userData = userSnap.data();
         if (userData.role === "staff") {
           toast({
-            title: "مرحباً بك",
-            description: `أهلاً بك يا ${userData.displayName || "زميلنا"}. تم الدخول بنجاح.`,
+            title: "مرحباً بك مجدداً",
+            description: `أهلاً بك يا ${userData.displayName || "المسؤول"}. تم الدخول بصلاحيات الإدارة.`,
           });
           router.push("/staff");
         } else {
           toast({
             title: "عذراً",
-            description: "هذا الحساب ليس لديه صلاحيات الموظفين.",
+            description: "هذا الحساب ليس لديه صلاحيات المسؤول.",
             variant: "destructive"
           });
         }
       } else {
         toast({
           title: "تنبيه",
-          description: "تم تسجيل الدخول ولكن لم يتم العثور على بياناتك في النظام. يرجى مراجعة الإدارة.",
+          description: "تم تسجيل الدخول ولكن لم يتم العثور على بياناتك في قاعدة البيانات.",
           variant: "destructive"
         });
       }
     } catch (error: any) {
       let errorMessage = "يرجى التأكد من البريد الإلكتروني وكلمة المرور.";
       
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+      if (error.code === 'auth/invalid-credential') {
+        errorMessage = "البيانات المدخلة غير صحيحة، يرجى المحاولة مرة أخرى.";
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "محاولات كثيرة خاطئة. تم حظر الدخول مؤقتاً، يرجى المحاولة لاحقاً.";
+        errorMessage = "محاولات كثيرة خاطئة. يرجى المحاولة لاحقاً.";
       }
 
       toast({
-        title: "خطأ في تسجيل الدخول",
+        title: "خطأ في الدخول",
         description: errorMessage,
         variant: "destructive"
       });
@@ -77,22 +77,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4 sm:p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
       <Card className="w-full max-w-[400px] border-none shadow-2xl rounded-[2.5rem] overflow-hidden luxury-card bg-white/90 backdrop-blur-md">
         <CardHeader className="bg-[#432419] text-white p-8 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/30 to-transparent" />
           <div className="flex justify-center mb-4 relative z-10">
-            <div className="relative w-20 h-20 transition-transform hover:scale-105 duration-500">
+            <div className="relative w-20 h-20 transition-transform hover:scale-105">
               <Image 
                 src="https://i.postimg.cc/zfhr8CtC/65774426-19fd-4c21-892e-81dba55d501b-removebg-preview.png"
                 alt="Diamond Logo"
                 fill
-                className="object-contain drop-shadow-2xl"
+                className="object-contain"
               />
             </div>
           </div>
-          <CardTitle className="text-xl font-headline font-black relative z-10 tracking-tight text-white">دخول الموظفين</CardTitle>
-          <p className="text-white/60 text-xs mt-1 font-medium relative z-10">فريق Diamond المتميز</p>
+          <CardTitle className="text-xl font-headline font-black relative z-10 text-white">دخول المسؤولين</CardTitle>
+          <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest">Diamond Administration</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-5">
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 onClick={() => router.push("/register-staff")}
                 className="w-full text-[#432419] border-[#432419]/10 h-11 rounded-xl font-bold text-xs"
               >
-                <UserPlus className="ml-2 h-3.5 w-3.5" /> تسجيل موظف جديد
+                <UserPlus className="ml-2 h-3.5 w-3.5" /> إنشاء حساب مسؤول جديد
               </Button>
               <Button 
                 variant="ghost" 
