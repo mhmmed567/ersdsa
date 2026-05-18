@@ -5,43 +5,46 @@
 
 @layer base {
   :root {
-    /* Diamond Brand Colors */
-    --brand-dark-brown: 17 47% 18%;    /* #432419 */
-    --brand-coffee-brown: 19 50% 37%;  /* #8B4E2E */
-    --brand-copper: 24 58% 59%;        /* #D48A5A */
-    --brand-cream: 37 47% 91%;         /* #F2E8D9 */
+    /* Diamond Luxury Dark Theme */
+    --brand-dark-brown: 18 45% 8%;     /* #1a0f0a - Deep dark brown */
+    --brand-coffee-brown: 19 50% 15%;  /* #2a1811 - Dark coffee */
+    --brand-copper: 24 58% 59%;        /* #D48A5A - Copper accent */
+    --brand-cream: 37 47% 91%;         /* #F2E8D9 - Light cream */
 
-    --background: var(--brand-cream);
-    --foreground: var(--brand-dark-brown);
+    --background: var(--brand-dark-brown);
+    --foreground: var(--brand-cream);
     
-    --card: 0 0% 100%;
-    --card-foreground: var(--brand-dark-brown);
+    --card: var(--brand-coffee-brown);
+    --card-foreground: var(--brand-cream);
     
-    --primary: var(--brand-dark-brown);
-    --primary-foreground: var(--brand-cream);
+    --primary: var(--brand-copper);
+    --primary-foreground: var(--brand-dark-brown);
     
     --accent: var(--brand-copper);
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: var(--brand-dark-brown);
+
+    --muted: 18 30% 20%;
+    --muted-foreground: 37 20% 70%;
     
     --radius: 1.5rem;
   }
 
   body {
-    @apply bg-[#F2E8D9] text-[#432419] font-body selection:bg-[#D48A5A]/30 antialiased overflow-x-hidden;
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))] font-body selection:bg-[#D48A5A]/30 antialiased overflow-x-hidden;
   }
 }
 
 @layer components {
   .luxury-card {
-    @apply bg-white border border-white/40 shadow-md rounded-[1.5rem] sm:rounded-[2.5rem] transition-all duration-300 overflow-hidden;
+    @apply bg-[hsl(var(--card))] border border-white/5 shadow-2xl rounded-[1.5rem] sm:rounded-[2.5rem] transition-all duration-300 overflow-hidden;
   }
 
   .luxury-card:hover {
-    @apply shadow-xl -translate-y-1 bg-white/95;
+    @apply shadow-[0_20px_50px_rgba(0,0,0,0.5)] -translate-y-1;
   }
 
   .glass-effect {
-    @apply bg-white/40 backdrop-blur-2xl border border-white/40 shadow-lg;
+    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-lg;
   }
 }
 
