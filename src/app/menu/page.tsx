@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Plus, Sparkles, Star, Clock } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useState, useEffect, useMemo } from "react";
-import { useFirestore, useCollection } from "@/firebase";
+import { useState, useEffect } from "react";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 
 const CATEGORIES = ["الكل", "قهوة مختصة", "مشروبات باردة", "حلويات فاخرة"];
@@ -23,14 +23,13 @@ export default function MenuPage() {
     setIsMounted(true);
   }, []);
 
-  const productsQuery = useMemo(() => {
+  const productsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, "products"), orderBy("createdAt", "desc"));
   }, [db]);
 
   const { data: dbProducts, loading } = useCollection<MenuItem>(productsQuery);
 
-  // Fallback items if DB is empty
   const fallbackItems: MenuItem[] = [
     {
       id: "f1",
@@ -50,12 +49,9 @@ export default function MenuPage() {
     }
   ];
 
-  const displayItems = useMemo(() => {
-    const items = (dbProducts && dbProducts.length > 0) ? dbProducts : (loading ? [] : fallbackItems);
-    return selectedCategory === "الكل" 
-      ? items 
-      : items.filter(item => item.category === selectedCategory);
-  }, [dbProducts, loading, selectedCategory]);
+  const displayItems = (dbProducts && dbProducts.length > 0) 
+    ? (selectedCategory === "الكل" ? dbProducts : dbProducts.filter(item => item.category === selectedCategory))
+    : (loading ? [] : (selectedCategory === "الكل" ? fallbackItems : fallbackItems.filter(item => item.category === selectedCategory)));
 
   return (
     <div className="min-h-screen bg-[#F2E8D9] pb-24">
@@ -72,10 +68,10 @@ export default function MenuPage() {
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-l from-[#432419] via-[#432419]/40 to-transparent flex items-center pr-6 sm:pr-10">
-            <div className="space-y-1 sm:space-y-3">
-              <div className="flex items-center gap-1.5 text-[#D48A5A]">
-                <Star className="h-3 w-3 fill-current" />
+            <div className="space-y-1 sm:space-y-3 text-right">
+              <div className="flex items-center gap-1.5 text-[#D48A5A] justify-end">
                 <span className="text-[8px] font-black uppercase tracking-widest">Diamond Exclusive</span>
+                <Star className="h-3 w-3 fill-current" />
               </div>
               <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">مذاق لا ينسى</h2>
               <p className="text-white/80 text-[10px] sm:text-xs max-w-[150px] sm:max-w-[250px] leading-relaxed font-medium">نستخلص لك السعادة في كل كوب.</p>
@@ -83,7 +79,7 @@ export default function MenuPage() {
           </div>
         </section>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar" dir="rtl">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -105,7 +101,7 @@ export default function MenuPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5" dir="rtl">
           {displayItems.map((item) => (
             <div 
               key={item.id} 
@@ -123,27 +119,27 @@ export default function MenuPage() {
                 </div>
               </div>
               
-              <div className="flex flex-col flex-grow justify-between gap-2">
+              <div className="flex flex-col flex-grow justify-between gap-2 text-right">
                 <div>
                   <h3 className="text-xs sm:text-sm font-black text-[#432419] mb-1 group-hover:text-[#D48A5A] transition-colors line-clamp-1">
                     {item.name}
                   </h3>
-                  <p className="text-[9px] sm:text-[10px] text-[#8B4E2E]/70 line-clamp-2 leading-tight">
+                  <p className="text-[9px] sm:text-[10px] text-[#8B4E2E]/70 line-clamp-2 leading-tight h-6">
                     {item.description}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between mt-1">
-                  <div className="flex flex-col gap-0.5 text-[8px] text-[#8B4E2E]/60 font-black">
-                    <span className="flex items-center gap-1 uppercase"><Clock className="h-2 w-2 text-[#D48A5A]" /> 8 min</span>
-                    <span className="flex items-center gap-1 uppercase"><Sparkles className="h-2 w-2 text-[#D48A5A]" /> Premium</span>
-                  </div>
                   <Button 
                     onClick={() => addToCart(item)}
                     className="bg-[#432419] hover:bg-[#D48A5A] text-white rounded-lg h-7 w-7 sm:h-8 sm:w-8 p-0 shadow-md active:scale-90 transition-all"
                   >
                     <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
+                  <div className="flex flex-col gap-0.5 text-[8px] text-[#8B4E2E]/60 font-black items-end">
+                    <span className="flex items-center gap-1 uppercase">8 min <Clock className="h-2 w-2 text-[#D48A5A]" /></span>
+                    <span className="flex items-center gap-1 uppercase">Premium <Sparkles className="h-2 w-2 text-[#D48A5A]" /></span>
+                  </div>
                 </div>
               </div>
             </div>

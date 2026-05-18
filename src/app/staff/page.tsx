@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useUser, useFirestore, useCollection } from "@/firebase";
+import { useEffect, useState } from "react";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { doc, getDoc, collection, updateDoc, query, orderBy, addDoc, deleteDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Order, MenuItem } from "@/lib/store";
@@ -10,13 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LogOut, Coffee, Sparkles, Car, Phone, Clock, Plus, Trash2, LayoutDashboard, ShoppingBag } from "lucide-react";
-import { staffOrderSummary } from "@/ai/flows/staff-order-summary";
+import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, ShoppingBag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function StaffDashboard() {
   const { user, loading: userLoading } = useUser();
@@ -24,24 +22,20 @@ export default function StaffDashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [isStaff, setIsStaff] = useState<boolean | null>(null);
-  const [activeTab, setActiveTab] = useState("orders");
 
-  // Orders Query
-  const ordersQuery = useMemo(() => {
+  // Orders Query - stabilized with useMemoFirebase
+  const ordersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, "orders"), orderBy("createdAt", "desc"));
   }, [db]);
-  const { data: ordersData, loading: ordersLoading } = useCollection<Order>(ordersQuery);
+  const { data: ordersData } = useCollection<Order>(ordersQuery);
 
-  // Products Query
-  const productsQuery = useMemo(() => {
+  // Products Query - stabilized with useMemoFirebase
+  const productsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, "products"), orderBy("createdAt", "desc"));
   }, [db]);
   const { data: productsData } = useCollection<MenuItem>(productsQuery);
-
-  const [aiSummaries, setAiSummaries] = useState<Record<string, string>>({});
-  const [loadingAi, setLoadingAi] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const checkRole = async () => {
@@ -74,7 +68,7 @@ export default function StaffDashboard() {
     if (db) {
       const orderRef = doc(db, "orders", orderId);
       updateDoc(orderRef, { status: nextStatus })
-        .catch(async (error) => {
+        .catch(async () => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: orderRef.path,
             operation: 'update',
@@ -125,7 +119,7 @@ export default function StaffDashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="orders" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="orders" className="w-full">
           <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white/50 p-1 rounded-2xl">
             <TabsTrigger value="orders" className="rounded-xl font-black data-[state=active]:bg-[#432419] data-[state=active]:text-white">
               <ShoppingBag className="ml-2 h-4 w-4" /> الطلبات
@@ -166,26 +160,26 @@ export default function StaffDashboard() {
           <TabsContent value="products">
             <div className="grid gap-8">
               <Card className="p-6 luxury-card max-w-2xl mx-auto w-full">
-                <h3 className="text-lg font-black mb-4 flex items-center gap-2"><Plus className="h-5 w-5" /> إضافة منتج جديد</h3>
-                <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input name="name" placeholder="اسم المنتج" required />
-                  <Input name="price" type="number" placeholder="السعر" required />
-                  <Input name="category" placeholder="التصنيف (مثلاً: قهوة مختصة)" required />
-                  <Input name="description" placeholder="وصف قصير" required />
+                <h3 className="text-lg font-black mb-4 flex items-center gap-2 text-right"><Plus className="h-5 w-5" /> إضافة منتج جديد</h3>
+                <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-right" dir="rtl">
+                  <Input name="name" placeholder="اسم المنتج" required className="text-right" />
+                  <Input name="price" type="number" placeholder="السعر" required className="text-right" />
+                  <Input name="category" placeholder="التصنيف (مثلاً: قهوة مختصة)" required className="text-right" />
+                  <Input name="description" placeholder="وصف قصير" required className="text-right" />
                   <Button type="submit" className="sm:col-span-2 bg-[#D48A5A]">إضافة للمنيو</Button>
                 </form>
               </Card>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
                 {productsData?.map((product) => (
                   <Card key={product.id} className="p-4 luxury-card flex items-center justify-between">
-                    <div>
-                      <h4 className="font-black text-sm">{product.name}</h4>
-                      <p className="text-xs opacity-60">{product.price} ر.س</p>
-                    </div>
                     <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteProduct(product.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    <div className="text-right">
+                      <h4 className="font-black text-sm">{product.name}</h4>
+                      <p className="text-xs opacity-60">{product.price} ر.س</p>
+                    </div>
                   </Card>
                 ))}
               </div>
