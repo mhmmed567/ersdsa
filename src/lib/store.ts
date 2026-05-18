@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from "zustand";
@@ -29,7 +28,7 @@ export interface Order {
   createdAt: number;
 }
 
-interface WarmHearthState {
+interface DiamondState {
   role: 'customer' | 'staff' | null;
   cart: CartItem[];
   setRole: (role: 'customer' | 'staff' | null) => void;
@@ -39,7 +38,7 @@ interface WarmHearthState {
   clearCart: () => void;
 }
 
-export const useStore = create<WarmHearthState>((set, get) => ({
+export const useStore = create<DiamondState>((set, get) => ({
   role: null,
   cart: [],
   setRole: (role) => set({ role }),

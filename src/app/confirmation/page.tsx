@@ -24,7 +24,7 @@ function ConfirmationContent() {
           
           <div className="space-y-4">
             <h1 className="text-4xl font-headline font-bold text-primary">تم استلام طلبك بنجاح!</h1>
-            <p className="text-xl text-muted-foreground">شكراً لثقتك بـ Warm Hearth. نحن نعمل الآن على تجهيز طلبك بأفضل جودة.</p>
+            <p className="text-xl text-muted-foreground">شكراً لثقتك بـ Diamond. نحن نعمل الآن على تجهيز طلبك بأفضل جودة.</p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl border border-success/20 shadow-sm inline-block w-full">
