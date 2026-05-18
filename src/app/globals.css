@@ -4,28 +4,28 @@
 
 @layer base {
   :root {
-    --background: 20 20% 4%;
-    --foreground: 30 20% 98%;
-    --card: 20 20% 7%;
-    --card-foreground: 30 20% 98%;
-    --popover: 20 20% 7%;
-    --popover-foreground: 30 20% 98%;
-    --primary: 15 65% 45%;
-    --primary-foreground: 30 20% 98%;
-    --secondary: 20 15% 15%;
-    --secondary-foreground: 30 20% 98%;
-    --muted: 20 15% 12%;
-    --muted-foreground: 20 10% 65%;
-    --accent: 18 70% 60%;
-    --accent-foreground: 20 20% 4%;
+    --background: 40 30% 98%;
+    --foreground: 20 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 20% 15%;
+    --primary: 18 65% 45%;
+    --primary-foreground: 40 30% 98%;
+    --secondary: 35 25% 94%;
+    --secondary-foreground: 20 20% 15%;
+    --muted: 35 20% 90%;
+    --muted-foreground: 20 10% 45%;
+    --accent: 18 75% 55%;
+    --accent-foreground: 40 30% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 20 15% 15%;
-    --input: 20 15% 15%;
-    --ring: 15 65% 45%;
+    --border: 35 15% 85%;
+    --input: 35 15% 85%;
+    --ring: 18 65% 45%;
     --radius: 1.5rem;
     --success: 160 80% 30%;
-    --success-foreground: 30 20% 98%;
+    --success-foreground: 40 30% 98%;
   }
 }
 
@@ -50,18 +50,17 @@
 }
 
 .product-card {
-  @apply rounded-[2.5rem] overflow-hidden border-none shadow-xl transition-all duration-300 hover:shadow-primary/10;
+  @apply rounded-[2.5rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-300 hover:shadow-primary/5;
 }
 
 .category-pill {
   @apply rounded-full px-6 py-2 text-sm font-medium transition-all duration-200;
 }
 
-/* إضافة لمسة تدرج لتعطى فخامة مثل الشعار */
 .premium-gradient {
-  background: linear-gradient(135deg, hsl(15, 65%, 45%) 0%, hsl(20, 70%, 55%) 100%);
+  background: linear-gradient(135deg, hsl(18, 65%, 45%) 0%, hsl(22, 75%, 55%) 100%);
 }
 
 .premium-card-gradient {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(245,245,240,0.5) 100%);
 }

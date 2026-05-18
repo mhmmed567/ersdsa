@@ -17,7 +17,7 @@ export default function BottomNav() {
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[70%] max-w-xs z-50">
-      <div className="bg-card/80 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white/5 p-2 flex items-center justify-around">
+      <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-xl border border-border/50 p-2 flex items-center justify-around">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -25,7 +25,7 @@ export default function BottomNav() {
               key={item.href} 
               href={item.href}
               className={`flex items-center gap-3 px-6 py-3 rounded-[2rem] transition-all relative ${
-                isActive ? "premium-gradient text-white scale-105 shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-white/5"
+                isActive ? "premium-gradient text-white scale-105 shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary"
               }`}
             >
               <div className="relative">

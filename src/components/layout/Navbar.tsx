@@ -21,8 +21,8 @@ export default function Navbar() {
         {/* Logo and User Row */}
         <div className="flex items-center justify-between">
           <Link href="/menu">
-            <div className="flex items-center gap-2.5 bg-card/50 backdrop-blur-md pl-1.5 pr-5 py-1.5 rounded-full border border-white/5">
-               <div className="relative w-9 h-9 rounded-full overflow-hidden bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="flex items-center gap-2.5 bg-white/80 backdrop-blur-md pl-1.5 pr-5 py-1.5 rounded-full border border-border/50 shadow-sm">
+               <div className="relative w-9 h-9 rounded-full overflow-hidden bg-primary flex items-center justify-center shadow-md shadow-primary/20">
                  <span className="text-white text-[12px] font-black">D</span>
                </div>
                <span className="font-headline text-xl font-black text-primary tracking-tight">Diamond</span>
@@ -32,18 +32,18 @@ export default function Navbar() {
           <div className="flex gap-2">
             {user ? (
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-2xl bg-card border border-white/5">
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-2xl bg-white border border-border/50 shadow-sm">
                   <LogOut className="h-5 w-5 text-destructive" />
                 </Button>
-                <Link href="/profile">
-                  <div className="w-11 h-11 rounded-2xl bg-card border border-white/5 flex items-center justify-center text-muted-foreground">
+                <Link href="/staff">
+                  <div className="w-11 h-11 rounded-2xl bg-white border border-border/50 shadow-sm flex items-center justify-center text-primary">
                     <User className="h-5 w-5" />
                   </div>
                 </Link>
               </div>
             ) : (
               <Link href="/login">
-                <div className="w-11 h-11 rounded-2xl bg-card border border-white/5 flex items-center justify-center text-primary">
+                <div className="w-11 h-11 rounded-2xl bg-white border border-border/50 shadow-sm flex items-center justify-center text-primary">
                   <User className="h-5 w-5" />
                 </div>
               </Link>
@@ -58,7 +58,7 @@ export default function Navbar() {
           </div>
           <Input 
             placeholder="ابحث عن مشروبك .." 
-            className="w-full h-12 bg-card rounded-2xl border border-white/5 pr-11 text-right text-sm focus-visible:ring-primary/20 transition-all placeholder:text-muted-foreground/60"
+            className="w-full h-12 bg-white rounded-2xl border border-border/50 pr-11 text-right text-sm shadow-sm focus-visible:ring-primary/20 transition-all placeholder:text-muted-foreground/60"
           />
         </div>
       </div>
