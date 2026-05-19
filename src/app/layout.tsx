@@ -3,6 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
+import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: 'Diamond | تجربة القهوة الفاخرة',
@@ -21,9 +22,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Outfit:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased min-h-screen bg-[#110b09] text-[#F2E8D9] selection:bg-[#D48A5A]/30 overflow-x-hidden">
+      <body className="font-body antialiased min-h-screen bg-[#110b09] text-[#F2E8D9] selection:bg-[#D48A5A]/30 overflow-x-hidden flex flex-col">
         <FirebaseClientProvider>
-          {children}
+          <div className="flex-grow">
+            {children}
+          </div>
+          <Footer />
           <Toaster />
         </FirebaseClientProvider>
       </body>
