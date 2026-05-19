@@ -1,4 +1,3 @@
-
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
@@ -20,7 +19,7 @@ import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/e
 
 const checkoutSchema = z.object({
   customerName: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل"),
-  customerPhoneNumber: z.string().min(10, "رقم الجوال غير صحيح"),
+  customerPhoneNumber: z.string().min(8, "رقم الجوال العُماني يجب أن يكون 8 أرقام"),
   carType: z.string().min(2, "يرجى إدخال نوع السيارة"),
   carLicensePlate: z.string().min(1, "يرجى إدخال رقم اللوحة"),
   specialRequests: z.string().optional(),
@@ -49,7 +48,9 @@ export default function CheckoutPage() {
     if (!db) return;
 
     const orderId = `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const vat = subtotal * 0.05;
+    const totalPrice = subtotal + vat;
 
     const orderData = {
       ...values,
@@ -125,7 +126,7 @@ export default function CheckoutPage() {
                             <Phone className="h-4 w-4" /> رقم الجوال
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="05xxxxxxxx" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" dir="ltr" />
+                            <Input placeholder="9xxxxxxx" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" dir="ltr" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -143,7 +144,7 @@ export default function CheckoutPage() {
                             <Info className="h-4 w-4" /> نوع السيارة
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="مثلاً: تويوتا كامري" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" />
+                            <Input placeholder="مثلاً: لاندكروزر" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -159,7 +160,7 @@ export default function CheckoutPage() {
                             <Car className="h-4 w-4" /> رقم اللوحة
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="أ ب ج 1 2 3" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" dir="ltr" />
+                            <Input placeholder="1234 أ ب" {...field} className="h-14 rounded-2xl bg-[#432419]/5 border-none focus-visible:ring-1 focus-visible:ring-[#D48A5A]" dir="ltr" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useStore();
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const vat = subtotal * 0.15;
+  const vat = subtotal * 0.05; // Oman VAT is 5%
   const total = subtotal + vat;
 
   if (cart.length === 0) {
@@ -54,7 +54,7 @@ export default function CartPage() {
                   <div className="flex-grow text-center sm:text-right">
                     <h3 className="text-lg font-headline font-bold text-primary">{item.name}</h3>
                     <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
-                    <p className="text-accent font-bold">{item.price} ر.س</p>
+                    <p className="text-accent font-bold">{item.price.toFixed(3)} ر.ع</p>
                   </div>
 
                   <div className="flex items-center gap-4">
@@ -101,16 +101,16 @@ export default function CartPage() {
               <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">المجموع الفرعي</span>
-                  <span>{subtotal.toFixed(2)} ر.س</span>
+                  <span>{subtotal.toFixed(3)} ر.ع</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">ضريبة القيمة المضافة (15%)</span>
-                  <span>{vat.toFixed(2)} ر.س</span>
+                  <span className="text-muted-foreground">ضريبة القيمة المضافة (5%)</span>
+                  <span>{vat.toFixed(3)} ر.ع</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-xl font-bold text-primary">
                   <span>الإجمالي</span>
-                  <span>{total.toFixed(2)} ر.س</span>
+                  <span>{total.toFixed(3)} ر.ع</span>
                 </div>
                 
                 <Link href="/checkout" className="block w-full pt-4">

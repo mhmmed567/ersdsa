@@ -1,17 +1,16 @@
-
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@/firebase";
-import { doc, getDoc, collection, updateDoc, query, orderBy, addDoc, deleteDoc, setDoc, where } from "firebase/firestore";
+import { doc, getDoc, collection, updateDoc, query, orderBy, deleteDoc, setDoc, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Order, MenuItem, CartItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, Coffee, Car, Phone, Plus, Trash2, LayoutDashboard, Loader2, Users, Settings, TrendingUp, Calendar, Check, PlusCircle, AlertCircle, Clock } from "lucide-react";
+import { Car, LayoutDashboard, Loader2, Users, TrendingUp, Calendar, Check, PlusCircle, AlertCircle, Clock, Trash2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -176,7 +175,9 @@ export default function StaffDashboard() {
     }
     const formData = new FormData(e.currentTarget);
     const orderId = `MAN-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-    const totalPrice = manualOrderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = manualOrderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const vat = subtotal * 0.05;
+    const totalPrice = subtotal + vat;
 
     const orderData = {
       id: orderId,
@@ -312,21 +313,21 @@ export default function StaffDashboard() {
                   <DialogHeader><DialogTitle className="text-right font-black text-[#F2E8D9]">طلب يدوي جديد</DialogTitle></DialogHeader>
                   <form onSubmit={handleManualOrder} className="space-y-4 pt-4">
                     <Input name="customerName" placeholder="اسم الزبون" required className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
-                    <Input name="customerPhone" placeholder="رقم الجوال" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" dir="ltr" />
+                    <Input name="customerPhone" placeholder="9xxxxxxx" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" dir="ltr" />
                     <div className="grid grid-cols-2 gap-4">
                       <Input name="carType" placeholder="نوع السيارة" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
                       <Input name="carPlate" placeholder="رقم اللوحة" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" dir="ltr" />
                     </div>
                     <Select onValueChange={addItemToManualOrder}>
                       <SelectTrigger className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9]"><SelectValue placeholder="أضف منتجاً للطلب" /></SelectTrigger>
-                      <SelectContent className="bg-[#1a0f0a] border-white/10 text-[#F2E8D9]">{productsData?.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.price} ر.س</SelectItem>)}</SelectContent>
+                      <SelectContent className="bg-[#1a0f0a] border-white/10 text-[#F2E8D9]">{productsData?.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.price.toFixed(3)} ر.ع</SelectItem>)}</SelectContent>
                     </Select>
                     {manualOrderItems.length > 0 && (
                       <div className="bg-white/5 p-4 rounded-xl space-y-2 max-h-40 overflow-y-auto">
-                        {manualOrderItems.map(item => <div key={item.id} className="flex justify-between text-xs font-bold"><span>{item.quantity}x {item.name}</span><span>{item.price * item.quantity} ر.س</span></div>)}
+                        {manualOrderItems.map(item => <div key={item.id} className="flex justify-between text-xs font-bold"><span>{item.quantity}x {item.name}</span><span>{(item.price * item.quantity).toFixed(3)} ر.ع</span></div>)}
                       </div>
                     )}
-                    <Button type="submit" className="w-full h-14 bg-[#D48A5A] text-[#110b09] rounded-xl font-black">تأكيد الطلب ({manualOrderItems.reduce((s,i) => s + i.price*i.quantity, 0)} ر.س)</Button>
+                    <Button type="submit" className="w-full h-14 bg-[#D48A5A] text-[#110b09] rounded-xl font-black">تأكيد الطلب ({(manualOrderItems.reduce((s,i) => s + i.price*i.quantity, 0) * 1.05).toFixed(3)} ر.ع مع الضريبة)</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -347,19 +348,19 @@ export default function StaffDashboard() {
                     </div>
                     <div className="text-[11px] text-[#F2E8D9]/60 space-y-2 mb-4">
                       <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} {order.carLicensePlate !== "N/A" && `- ${order.carLicensePlate}`}</div>
-                      <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
+                      <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-OM')}</div>
                     </div>
                     <div className="border-t border-white/5 py-3 space-y-1">
                       {order.items?.map((item, i) => (
                         <div key={i} className="flex justify-between text-[10px] font-bold text-[#F2E8D9]/80">
                           <span>{item.quantity}x {item.name}</span>
-                          <span className="text-[#D48A5A]">{item.price * item.quantity} ر.س</span>
+                          <span className="text-[#D48A5A]">{(item.price * item.quantity).toFixed(3)} ر.ع</span>
                         </div>
                       ))}
                     </div>
                     <div className="mt-4 flex flex-col gap-3">
                       <div className="flex justify-between items-center font-black text-xs text-[#F2E8D9]">
-                        <span>الإجمالي: {order.totalPrice} ر.س</span>
+                        <span>الإجمالي: {order.totalPrice.toFixed(3)} ر.ع</span>
                       </div>
                       {order.status !== 'completed' && (
                         <Button className="w-full h-10 bg-white/5 hover:bg-[#D48A5A] hover:text-[#110b09] text-[#F2E8D9] rounded-xl text-xs font-black shadow-md transition-all" onClick={() => handleStatusChange(order.id, order.status)}>
@@ -398,7 +399,7 @@ export default function StaffDashboard() {
                       <DialogHeader><DialogTitle className="text-right font-black text-[#F2E8D9]">إضافة صنف جديد</DialogTitle></DialogHeader>
                       <div className="space-y-4 pt-4">
                         <Input placeholder="اسم المنتج" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
-                        <Input placeholder="السعر" type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                        <Input placeholder="السعر (بالريال العماني)" type="number" step="0.001" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
                         <Select onValueChange={val => setNewProduct({...newProduct, category: val})}>
                           <SelectTrigger className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9]"><SelectValue placeholder="التصنيف" /></SelectTrigger>
                           <SelectContent className="bg-[#1a0f0a] border-white/10 text-[#F2E8D9]">
@@ -421,7 +422,7 @@ export default function StaffDashboard() {
                         {product.image && <img src={product.image} className="w-full h-full object-cover" />}
                       </div>
                       <h3 className="font-black text-sm mb-1 text-[#F2E8D9]">{product.name}</h3>
-                      <p className="text-[10px] text-[#D48A5A] mb-3">{product.price} ر.س</p>
+                      <p className="text-[10px] text-[#D48A5A] mb-3">{product.price.toFixed(3)} ر.ع</p>
                       <Button variant="destructive" size="sm" className="w-full rounded-lg h-9" onClick={() => handleDeleteProduct(product.id)}>
                         <Trash2 className="ml-2 h-3.5 w-3.5" /> حذف
                       </Button>

@@ -1,10 +1,9 @@
-
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
 import { useStore, MenuItem } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Star, Clock, Coffee } from "lucide-react";
+import { Plus, Sparkles, Clock, Coffee } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
@@ -88,7 +87,7 @@ export default function MenuPage() {
                   />
                 )}
                 <div className="absolute bottom-2 right-2 bg-[#432419]/80 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-lg shadow-sm border border-white/10">
-                  {item.price} ر.س
+                  {item.price.toFixed(3)} ر.ع
                 </div>
               </div>
               
