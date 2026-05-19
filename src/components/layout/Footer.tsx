@@ -11,13 +11,13 @@ export default function Footer() {
         {/* Design Rights */}
         <div className="flex flex-col items-center gap-2">
           <span className="text-[10px] uppercase tracking-[0.3em] text-[#D48A5A] font-black">Design & Development</span>
-          <h2 className="text-2xl font-accent italic text-[#F2E8D9]">Diamond</h2>
-          <p className="text-[11px] font-bold text-[#F2E8D9]/30">تم تصميم وتطوير الموقع بواسطة فريق Diamond</p>
+          <h2 className="text-2xl font-accent italic text-[#F2E8D9]">مُحَمَّدبْن عَلِيّ </h2>
+          <p className="text-[11px] font-bold text-[#F2E8D9]/30">تم تصميم وتطوير الموقع بواسطة </p>
         </div>
         
         {/* Instagram Link */}
         <Link 
-          href="https://instagram.com" 
+          href="https://www.instagram.com/vw47.o" 
           target="_blank" 
           className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 hover:border-[#D48A5A]/30 hover:bg-[#D48A5A]/5 transition-all group"
         >
