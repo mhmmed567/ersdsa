@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Lock, Mail, User, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 
 export default function RegisterStaffPage() {
   const auth = useAuth();
@@ -54,51 +53,73 @@ export default function RegisterStaffPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
-      <Card className="w-full max-w-[450px] border-none shadow-2xl rounded-[2.5rem] overflow-hidden luxury-card bg-white/90 backdrop-blur-md">
-        <CardHeader className="bg-[#432419] text-white p-8 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/30 to-transparent" />
-          <CardTitle className="text-xl font-headline font-black relative z-10 text-white text-center">إضافة عضو للفريق</CardTitle>
-          <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest text-center text-white">Diamond Team Registration</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#110b09] p-4">
+      <Card className="w-full max-w-[450px] border-none shadow-2xl rounded-[2.5rem] overflow-hidden luxury-card bg-[#1a0f0a] border-white/5">
+        <CardHeader className="bg-[#2a1811] text-[#F2E8D9] p-8 text-center relative overflow-hidden border-b border-white/5">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/10 to-transparent" />
+          <CardTitle className="text-xl font-headline font-black relative z-10 text-center">إضافة عضو للفريق</CardTitle>
+          <p className="text-[#D48A5A] text-[10px] mt-1 font-bold relative z-10 uppercase tracking-widest text-center">Diamond Team Registration</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
           <form onSubmit={handleRegister} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 flex items-center gap-2 pr-1 uppercase">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 flex items-center gap-2 pr-1 uppercase">
                 <User className="h-3 w-3 text-[#D48A5A]" /> الاسم الكامل
               </label>
-              <Input placeholder="اسم الموظف" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner" />
+              <Input 
+                placeholder="اسم الموظف" 
+                value={displayName} 
+                onChange={(e) => setDisplayName(e.target.value)} 
+                required 
+                className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] placeholder:text-[#F2E8D9]/20 focus-visible:ring-[#D48A5A]" 
+              />
             </div>
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 flex items-center gap-2 pr-1 uppercase">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 flex items-center gap-2 pr-1 uppercase">
                 <Mail className="h-3 w-3 text-[#D48A5A]" /> البريد الإلكتروني المهني
               </label>
-              <Input type="email" placeholder="example@diamond.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner" dir="ltr" />
+              <Input 
+                type="email" 
+                placeholder="example@diamond.com" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+                className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] placeholder:text-[#F2E8D9]/20 focus-visible:ring-[#D48A5A]" 
+                dir="ltr" 
+              />
             </div>
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 flex items-center gap-2 pr-1 uppercase">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 flex items-center gap-2 pr-1 uppercase">
                 <Lock className="h-3 w-3 text-[#D48A5A]" /> كلمة المرور
               </label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner" dir="ltr" />
+              <Input 
+                type="password" 
+                placeholder="••••••••" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] placeholder:text-[#F2E8D9]/20 focus-visible:ring-[#D48A5A]" 
+                dir="ltr" 
+              />
             </div>
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 flex items-center gap-2 pr-1 uppercase">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 flex items-center gap-2 pr-1 uppercase">
                 <ShieldCheck className="h-3 w-3 text-[#D48A5A]" /> تحديد الصلاحية
               </label>
               <Select defaultValue="staff" onValueChange={setRole}>
-                <SelectTrigger className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner">
+                <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] focus:ring-[#D48A5A]">
                   <SelectValue placeholder="اختر النوع" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#2a1811] border-white/10 text-[#F2E8D9]">
                   <SelectItem value="staff">موظف (طلبات فقط)</SelectItem>
                   <SelectItem value="admin">مدير (تحكم كامل)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={loading} className="w-full h-14 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl font-black text-base shadow-lg transition-all active:scale-95">
+            <Button type="submit" disabled={loading} className="w-full h-14 bg-[#D48A5A] hover:bg-[#8B4E2E] text-[#1a0f0a] rounded-xl font-black text-base shadow-lg transition-all active:scale-95">
               {loading ? "جاري إنشاء الحساب..." : "تأكيد وإنشاء العضوية"}
             </Button>
-            <Button variant="ghost" type="button" onClick={() => router.push("/staff")} className="w-full text-[#8B4E2E] font-bold text-xs h-10 hover:bg-[#432419]/5">
+            <Button variant="ghost" type="button" onClick={() => router.push("/staff")} className="w-full text-[#F2E8D9]/60 hover:text-[#F2E8D9] font-bold text-xs h-10 hover:bg-white/5">
               <ArrowLeft className="ml-2 h-3.5 w-3.5" /> العودة للوحة التحكم
             </Button>
           </form>

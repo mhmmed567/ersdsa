@@ -56,7 +56,6 @@ export default function StaffDashboard() {
             router.push("/menu");
           }
         } else {
-          // محاولة ثانية في حال تأخر إنشاء الملف الشخصي
           setTimeout(async () => {
             const retrySnap = await getDoc(userRef);
             if (retrySnap.exists()) {
@@ -95,15 +94,12 @@ export default function StaffDashboard() {
   }, [db, userRole]);
   const { data: staffData } = useCollection<any>(staffDataQuery);
 
-  // Filtered Orders logic
   const displayedOrders = useMemo(() => {
     if (!ordersData) return [];
-    // الموظف يرى فقط غير المكتمل، المدير يرى كل شيء
     if (userRole === 'admin') return ordersData;
     return ordersData.filter(order => order.status !== 'completed');
   }, [ordersData, userRole]);
 
-  // Analytics Calculations
   const stats = useMemo(() => {
     if (!ordersData) return { dailyCount: 0, popularProduct: "جاري الحساب..." };
     const today = new Date().setHours(0, 0, 0, 0);
@@ -237,25 +233,25 @@ export default function StaffDashboard() {
 
   if (userLoading || isAuthChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9]">
+      <div className="min-h-screen flex items-center justify-center bg-[#110b09]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-[#432419]" />
-          <p className="text-sm font-black text-[#432419]/60">جاري التحقق من الصلاحيات...</p>
+          <Loader2 className="h-10 w-10 animate-spin text-[#D48A5A]" />
+          <p className="text-sm font-black text-[#F2E8D9]/60">جاري التحقق من الصلاحيات...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F2E8D9] pb-20">
-      <header className="bg-[#432419] text-white p-6 sticky top-0 z-50">
+    <div className="min-h-screen bg-[#110b09] pb-20">
+      <header className="bg-[#1a0f0a] border-b border-white/5 text-white p-6 sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <LayoutDashboard className="h-6 w-6 text-[#D48A5A]" />
-            <h1 className="text-xl font-black">Diamond {userRole === 'admin' ? 'Manager' : 'Staff'}</h1>
+            <h1 className="text-xl font-black text-[#F2E8D9]">Diamond {userRole === 'admin' ? 'Manager' : 'Staff'}</h1>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push("/menu")} className="text-white border-white/20 bg-white/10 hover:bg-white/20">المنيو</Button>
+            <Button variant="outline" onClick={() => router.push("/menu")} className="text-[#F2E8D9] border-white/10 bg-white/5 hover:bg-white/10">المنيو</Button>
             <Button variant="ghost" onClick={async () => {
               const auth = (await import('firebase/auth')).getAuth();
               auth.signOut();
@@ -267,70 +263,70 @@ export default function StaffDashboard() {
       <main className="container mx-auto px-4 py-8">
         {userRole === 'admin' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="luxury-card p-6 flex items-center gap-4 bg-white/80">
-              <div className="bg-[#432419] p-3 rounded-2xl text-white"><Calendar className="h-6 w-6" /></div>
+            <Card className="luxury-card p-6 flex items-center gap-4 bg-[#1a0f0a] border-white/5">
+              <div className="bg-[#D48A5A] p-3 rounded-2xl text-[#110b09]"><Calendar className="h-6 w-6" /></div>
               <div>
                 <p className="text-[10px] font-black text-[#D48A5A] uppercase">طلبات اليوم</p>
-                <h2 className="text-2xl font-black text-[#432419]">{stats.dailyCount}</h2>
+                <h2 className="text-2xl font-black text-[#F2E8D9]">{stats.dailyCount}</h2>
               </div>
             </Card>
-            <Card className="luxury-card p-6 flex items-center gap-4 bg-white/80">
-              <div className="bg-[#D48A5A] p-3 rounded-2xl text-white"><TrendingUp className="h-6 w-6" /></div>
+            <Card className="luxury-card p-6 flex items-center gap-4 bg-[#1a0f0a] border-white/5">
+              <div className="bg-[#2a1811] border border-[#D48A5A]/30 p-3 rounded-2xl text-[#D48A5A]"><TrendingUp className="h-6 w-6" /></div>
               <div>
-                <p className="text-[10px] font-black text-[#432419]/60 uppercase">الأكثر إقبالاً</p>
-                <h2 className="text-lg font-black text-[#432419] truncate max-w-[150px]">{stats.popularProduct}</h2>
+                <p className="text-[10px] font-black text-[#F2E8D9]/60 uppercase">الأكثر إقبالاً</p>
+                <h2 className="text-lg font-black text-[#F2E8D9] truncate max-w-[150px]">{stats.popularProduct}</h2>
               </div>
             </Card>
-            <Card className="luxury-card p-6 flex items-center gap-4 bg-white/80">
-              <div className="bg-blue-600 p-3 rounded-2xl text-white"><Users className="h-6 w-6" /></div>
+            <Card className="luxury-card p-6 flex items-center gap-4 bg-[#1a0f0a] border-white/5">
+              <div className="bg-blue-900/40 p-3 rounded-2xl text-blue-400"><Users className="h-6 w-6" /></div>
               <div>
-                <p className="text-[10px] font-black text-[#432419]/60 uppercase">فريق العمل</p>
-                <h2 className="text-2xl font-black text-[#432419]">{staffData?.length || 0}</h2>
+                <p className="text-[10px] font-black text-[#F2E8D9]/60 uppercase">فريق العمل</p>
+                <h2 className="text-2xl font-black text-[#F2E8D9]">{staffData?.length || 0}</h2>
               </div>
             </Card>
           </div>
         )}
 
         <Tabs defaultValue="orders" className="w-full">
-          <TabsList className={`grid w-full ${userRole === 'admin' ? 'grid-cols-4' : 'grid-cols-1'} max-w-2xl mx-auto mb-10 bg-white/40 p-1.5 rounded-full overflow-hidden`}>
-            <TabsTrigger value="orders" className="rounded-full py-2.5 font-black text-xs">الطلبات</TabsTrigger>
+          <TabsList className={`grid w-full ${userRole === 'admin' ? 'grid-cols-4' : 'grid-cols-1'} max-w-2xl mx-auto mb-10 bg-white/5 p-1.5 rounded-full overflow-hidden`}>
+            <TabsTrigger value="orders" className="rounded-full py-2.5 font-black text-xs data-[state=active]:bg-[#D48A5A] data-[state=active]:text-[#110b09]">الطلبات</TabsTrigger>
             {userRole === 'admin' && (
               <>
-                <TabsTrigger value="products" className="rounded-full py-2.5 font-black text-xs">المنيو</TabsTrigger>
-                <TabsTrigger value="staff" className="rounded-full py-2.5 font-black text-xs">الموظفين</TabsTrigger>
-                <TabsTrigger value="settings" className="rounded-full py-2.5 font-black text-xs">الإعدادات</TabsTrigger>
+                <TabsTrigger value="products" className="rounded-full py-2.5 font-black text-xs data-[state=active]:bg-[#D48A5A] data-[state=active]:text-[#110b09]">المنيو</TabsTrigger>
+                <TabsTrigger value="staff" className="rounded-full py-2.5 font-black text-xs data-[state=active]:bg-[#D48A5A] data-[state=active]:text-[#110b09]">الموظفين</TabsTrigger>
+                <TabsTrigger value="settings" className="rounded-full py-2.5 font-black text-xs data-[state=active]:bg-[#D48A5A] data-[state=active]:text-[#110b09]">الإعدادات</TabsTrigger>
               </>
             )}
           </TabsList>
 
           <TabsContent value="orders">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black text-[#432419]">إدارة الطلبات</h2>
+              <h2 className="text-xl font-black text-[#F2E8D9]">إدارة الطلبات</h2>
               <Dialog open={isOrderDialogOpen} onOpenChange={setIsOrderDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-[#D48A5A] text-white rounded-full font-black px-6 shadow-lg">
+                  <Button className="bg-[#D48A5A] hover:bg-[#8B4E2E] text-[#110b09] rounded-full font-black px-6 shadow-lg">
                     <Plus className="ml-2 h-4 w-4" /> طلب جديد
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-[#F2E8D9] border-none rounded-[2rem]">
-                  <DialogHeader><DialogTitle className="text-right font-black">طلب يدوي جديد</DialogTitle></DialogHeader>
+                <DialogContent className="max-w-md bg-[#1a0f0a] border-white/10 rounded-[2rem] text-[#F2E8D9]">
+                  <DialogHeader><DialogTitle className="text-right font-black text-[#F2E8D9]">طلب يدوي جديد</DialogTitle></DialogHeader>
                   <form onSubmit={handleManualOrder} className="space-y-4 pt-4">
-                    <Input name="customerName" placeholder="اسم الزبون" required className="rounded-xl border-none h-12" />
-                    <Input name="customerPhone" placeholder="رقم الجوال" className="rounded-xl border-none h-12" dir="ltr" />
+                    <Input name="customerName" placeholder="اسم الزبون" required className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                    <Input name="customerPhone" placeholder="رقم الجوال" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" dir="ltr" />
                     <div className="grid grid-cols-2 gap-4">
-                      <Input name="carType" placeholder="نوع السيارة" className="rounded-xl border-none h-12" />
-                      <Input name="carPlate" placeholder="رقم اللوحة" className="rounded-xl border-none h-12" dir="ltr" />
+                      <Input name="carType" placeholder="نوع السيارة" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                      <Input name="carPlate" placeholder="رقم اللوحة" className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" dir="ltr" />
                     </div>
                     <Select onValueChange={addItemToManualOrder}>
-                      <SelectTrigger className="rounded-xl border-none h-12 bg-white"><SelectValue placeholder="أضف منتجاً للطلب" /></SelectTrigger>
-                      <SelectContent>{productsData?.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.price} ر.س</SelectItem>)}</SelectContent>
+                      <SelectTrigger className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9]"><SelectValue placeholder="أضف منتجاً للطلب" /></SelectTrigger>
+                      <SelectContent className="bg-[#1a0f0a] border-white/10 text-[#F2E8D9]">{productsData?.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.price} ر.س</SelectItem>)}</SelectContent>
                     </Select>
                     {manualOrderItems.length > 0 && (
-                      <div className="bg-white/40 p-4 rounded-xl space-y-2 max-h-40 overflow-y-auto">
+                      <div className="bg-white/5 p-4 rounded-xl space-y-2 max-h-40 overflow-y-auto">
                         {manualOrderItems.map(item => <div key={item.id} className="flex justify-between text-xs font-bold"><span>{item.quantity}x {item.name}</span><span>{item.price * item.quantity} ر.س</span></div>)}
                       </div>
                     )}
-                    <Button type="submit" className="w-full h-14 bg-[#432419] text-white rounded-xl font-black">تأكيد الطلب ({manualOrderItems.reduce((s,i) => s + i.price*i.quantity, 0)} ر.س)</Button>
+                    <Button type="submit" className="w-full h-14 bg-[#D48A5A] text-[#110b09] rounded-xl font-black">تأكيد الطلب ({manualOrderItems.reduce((s,i) => s + i.price*i.quantity, 0)} ر.س)</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -338,41 +334,41 @@ export default function StaffDashboard() {
 
             {ordersLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="h-8 w-8 animate-spin text-[#432419]/40" />
-                <p className="text-sm font-black text-[#432419]/40">جاري جلب الطلبات...</p>
+                <Loader2 className="h-8 w-8 animate-spin text-[#D48A5A]" />
+                <p className="text-sm font-black text-[#F2E8D9]/40">جاري جلب الطلبات...</p>
               </div>
             ) : displayedOrders.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {displayedOrders.map((order) => (
-                  <Card key={order.id} className={`p-6 luxury-card bg-white hover:shadow-xl transition-all ${order.status === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
+                  <Card key={order.id} className={`p-6 luxury-card bg-[#1a0f0a] border-white/5 hover:border-[#D48A5A]/30 transition-all ${order.status === 'completed' ? 'opacity-60 grayscale' : ''}`}>
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-black text-sm">{order.customerName}</h3>
+                      <h3 className="font-black text-sm text-[#F2E8D9]">{order.customerName}</h3>
                       <Badge className={`${getStatusColor(order.status)} text-[10px] text-white border-none`}>{getStatusLabel(order.status)}</Badge>
                     </div>
-                    <div className="text-[11px] text-[#8B4E2E] space-y-2 mb-4">
+                    <div className="text-[11px] text-[#F2E8D9]/60 space-y-2 mb-4">
                       <div className="flex items-center gap-2"><Car className="h-3 w-3 text-[#D48A5A]" /> {order.carType} {order.carLicensePlate !== "N/A" && `- ${order.carLicensePlate}`}</div>
                       <div className="flex items-center gap-2"><Clock className="h-3 w-3 text-[#D48A5A]" /> {new Date(order.createdAt).toLocaleTimeString('ar-SA')}</div>
                     </div>
-                    <div className="border-t border-dashed py-3 space-y-1">
+                    <div className="border-t border-white/5 py-3 space-y-1">
                       {order.items?.map((item, i) => (
-                        <div key={i} className="flex justify-between text-[10px] font-bold">
+                        <div key={i} className="flex justify-between text-[10px] font-bold text-[#F2E8D9]/80">
                           <span>{item.quantity}x {item.name}</span>
                           <span className="text-[#D48A5A]">{item.price * item.quantity} ر.س</span>
                         </div>
                       ))}
                     </div>
                     <div className="mt-4 flex flex-col gap-3">
-                      <div className="flex justify-between items-center font-black text-xs text-[#432419]">
+                      <div className="flex justify-between items-center font-black text-xs text-[#F2E8D9]">
                         <span>الإجمالي: {order.totalPrice} ر.س</span>
                       </div>
                       {order.status !== 'completed' && (
-                        <Button className="w-full h-10 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl text-xs font-black shadow-md" onClick={() => handleStatusChange(order.id, order.status)}>
+                        <Button className="w-full h-10 bg-white/5 hover:bg-[#D48A5A] hover:text-[#110b09] text-[#F2E8D9] rounded-xl text-xs font-black shadow-md transition-all" onClick={() => handleStatusChange(order.id, order.status)}>
                           تحديث إلى: {getStatusLabel(order.status === 'pending' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'completed')}
                         </Button>
                       )}
                       {order.status === 'completed' && (
-                        <div className="flex items-center justify-center gap-2 text-green-600 font-black text-xs py-2 bg-green-50 rounded-xl">
-                          <Check className="h-4 w-4" /> تم التسليم بنجاح
+                        <div className="flex items-center justify-center gap-2 text-green-500 font-black text-xs py-2 bg-green-500/10 rounded-xl">
+                          <Check className="h-4 w-4" /> تم التسليم
                         </div>
                       )}
                     </div>
@@ -380,10 +376,9 @@ export default function StaffDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-24 bg-white/40 rounded-[2.5rem] border border-dashed border-[#432419]/20">
-                <AlertCircle className="h-12 w-12 text-[#432419]/20 mb-4" />
-                <h3 className="text-lg font-black text-[#432419]/60">لا توجد طلبات حالية</h3>
-                <p className="text-xs font-bold text-[#432419]/40 mt-1">بمجرد وصول طلب جديد سيظهر هنا فوراً.</p>
+              <div className="flex flex-col items-center justify-center py-24 bg-white/5 rounded-[2.5rem] border border-dashed border-white/10">
+                <AlertCircle className="h-12 w-12 text-white/10 mb-4" />
+                <h3 className="text-lg font-black text-white/20">لا توجد طلبات حالية</h3>
               </div>
             )}
           </TabsContent>
@@ -392,41 +387,41 @@ export default function StaffDashboard() {
             <>
               <TabsContent value="products">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-black text-[#432419]">إدارة المنيو</h2>
+                  <h2 className="text-xl font-black text-[#F2E8D9]">إدارة المنيو</h2>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button className="bg-[#432419] text-white rounded-full font-black px-6">
+                      <Button className="bg-[#D48A5A] text-[#110b09] rounded-full font-black px-6">
                         <PlusCircle className="ml-2 h-4 w-4" /> إضافة منتج
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md bg-[#F2E8D9] border-none rounded-[2rem]">
-                      <DialogHeader><DialogTitle className="text-right font-black">إضافة صنف جديد</DialogTitle></DialogHeader>
+                    <DialogContent className="max-w-md bg-[#1a0f0a] border-white/10 rounded-[2rem] text-[#F2E8D9]">
+                      <DialogHeader><DialogTitle className="text-right font-black text-[#F2E8D9]">إضافة صنف جديد</DialogTitle></DialogHeader>
                       <div className="space-y-4 pt-4">
-                        <Input placeholder="اسم المنتج" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="rounded-xl border-none h-12" />
-                        <Input placeholder="السعر" type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="rounded-xl border-none h-12" />
+                        <Input placeholder="اسم المنتج" value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                        <Input placeholder="السعر" type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
                         <Select onValueChange={val => setNewProduct({...newProduct, category: val})}>
-                          <SelectTrigger className="rounded-xl border-none h-12 bg-white"><SelectValue placeholder="التصنيف" /></SelectTrigger>
-                          <SelectContent>
+                          <SelectTrigger className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9]"><SelectValue placeholder="التصنيف" /></SelectTrigger>
+                          <SelectContent className="bg-[#1a0f0a] border-white/10 text-[#F2E8D9]">
                             <SelectItem value="قهوة مختصة">قهوة مختصة</SelectItem>
                             <SelectItem value="مشروبات باردة">مشروبات باردة</SelectItem>
                             <SelectItem value="حلويات فاخرة">حلويات فاخرة</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Input placeholder="رابط صورة المنتج (URL)" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="rounded-xl border-none h-12" />
-                        <Input placeholder="وصف المنتج" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="rounded-xl border-none h-12" />
-                        <Button onClick={handleAddProduct} className="w-full h-14 bg-[#432419] text-white rounded-xl font-black">حفظ المنتج</Button>
+                        <Input placeholder="رابط صورة المنتج (URL)" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                        <Input placeholder="وصف المنتج" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" />
+                        <Button onClick={handleAddProduct} className="w-full h-14 bg-[#D48A5A] text-[#110b09] rounded-xl font-black">حفظ المنتج</Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {productsData?.map(product => (
-                    <Card key={product.id} className="luxury-card p-4 bg-white">
-                      <div className="relative h-32 rounded-xl overflow-hidden mb-3 bg-muted">
+                    <Card key={product.id} className="luxury-card p-4 bg-[#1a0f0a] border-white/5">
+                      <div className="relative h-32 rounded-xl overflow-hidden mb-3 bg-white/5">
                         {product.image && <img src={product.image} className="w-full h-full object-cover" />}
                       </div>
-                      <h3 className="font-black text-sm mb-1">{product.name}</h3>
-                      <p className="text-[10px] text-slate-500 mb-3">{product.price} ر.س</p>
+                      <h3 className="font-black text-sm mb-1 text-[#F2E8D9]">{product.name}</h3>
+                      <p className="text-[10px] text-[#D48A5A] mb-3">{product.price} ر.س</p>
                       <Button variant="destructive" size="sm" className="w-full rounded-lg h-9" onClick={() => handleDeleteProduct(product.id)}>
                         <Trash2 className="ml-2 h-3.5 w-3.5" /> حذف
                       </Button>
@@ -437,24 +432,24 @@ export default function StaffDashboard() {
 
               <TabsContent value="staff">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-black text-[#432419]">فريق العمل</h2>
+                  <h2 className="text-xl font-black text-[#F2E8D9]">فريق العمل</h2>
                   <Link href="/register-staff">
-                    <Button className="bg-[#432419] text-white rounded-full font-black px-6">
+                    <Button className="bg-[#D48A5A] text-[#110b09] rounded-full font-black px-6">
                       <PlusCircle className="ml-2 h-4 w-4" /> إضافة موظف
                     </Button>
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {staffData?.map(member => (
-                    <Card key={member.uid} className="luxury-card p-4 bg-white flex items-center justify-between">
+                    <Card key={member.uid} className="luxury-card p-4 bg-[#1a0f0a] border-white/5 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#432419]/5 flex items-center justify-center text-[#432419] font-black uppercase">{member.displayName?.[0] || 'U'}</div>
+                        <div className="w-10 h-10 rounded-full bg-[#D48A5A]/10 flex items-center justify-center text-[#D48A5A] font-black uppercase">{member.displayName?.[0] || 'U'}</div>
                         <div>
-                          <p className="font-black text-sm">{member.displayName}</p>
-                          <p className="text-[10px] text-slate-500">{member.email}</p>
+                          <p className="font-black text-sm text-[#F2E8D9]">{member.displayName}</p>
+                          <p className="text-[10px] text-white/40">{member.email}</p>
                         </div>
                       </div>
-                      <Badge className={member.role === 'admin' ? 'bg-[#D48A5A]' : 'bg-[#432419]'}>{member.role === 'admin' ? 'مدير' : 'موظف'}</Badge>
+                      <Badge className={member.role === 'admin' ? 'bg-[#D48A5A] text-[#110b09]' : 'bg-white/10 text-white'}>{member.role === 'admin' ? 'مدير' : 'موظف'}</Badge>
                     </Card>
                   ))}
                 </div>
@@ -462,20 +457,20 @@ export default function StaffDashboard() {
 
               <TabsContent value="settings">
                 <div className="max-w-md mx-auto">
-                  <Card className="luxury-card p-8 bg-white">
-                    <h2 className="text-xl font-black text-[#432419] mb-6 text-center">إعدادات التطبيق</h2>
+                  <Card className="luxury-card p-8 bg-[#1a0f0a] border-white/5">
+                    <h2 className="text-xl font-black text-[#F2E8D9] mb-6 text-center">إعدادات التطبيق</h2>
                     <form onSubmit={handleUpdateLogo} className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="text-xs font-black text-slate-500 uppercase">رابط الشعار الجديد (Logo URL)</Label>
-                        <Input name="logoUrl" placeholder="https://..." defaultValue={appSettings?.logoUrl} className="rounded-xl border-none bg-slate-50 h-12" required />
+                        <Label className="text-xs font-black text-[#F2E8D9]/60 uppercase">رابط الشعار الجديد (Logo URL)</Label>
+                        <Input name="logoUrl" placeholder="https://..." defaultValue={appSettings?.logoUrl} className="rounded-xl bg-white/5 border-none h-12 text-[#F2E8D9] placeholder:text-white/20" required />
                       </div>
                       {appSettings?.logoUrl && (
                         <div className="flex flex-col items-center gap-2">
-                          <p className="text-[10px] text-slate-400">الشعار الحالي:</p>
-                          <img src={appSettings.logoUrl} className="h-20 object-contain p-2 bg-slate-100 rounded-xl" />
+                          <p className="text-[10px] text-white/40">الشعار الحالي:</p>
+                          <img src={appSettings.logoUrl} className="h-20 object-contain p-2 bg-white/5 rounded-xl" />
                         </div>
                       )}
-                      <Button type="submit" className="w-full h-14 bg-[#432419] text-white rounded-xl font-black shadow-lg">تحديث الشعار</Button>
+                      <Button type="submit" className="w-full h-14 bg-[#D48A5A] text-[#110b09] rounded-xl font-black shadow-lg">تحديث الشعار</Button>
                     </form>
                   </Card>
                 </div>

@@ -40,7 +40,6 @@ export default function LoginPage() {
 
       if (userSnap.exists()) {
         const userData = userSnap.data();
-        // التحقق من أن المستخدم إما موظف أو مدير
         if (userData.role === "staff" || userData.role === "admin") {
           toast({
             title: "مرحباً بك مجدداً",
@@ -80,10 +79,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F2E8D9] p-4">
-      <Card className="w-full max-w-[400px] border-none shadow-2xl rounded-[2.5rem] overflow-hidden luxury-card bg-white/90 backdrop-blur-md">
-        <CardHeader className="bg-[#432419] text-white p-8 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/30 to-transparent" />
+    <div className="min-h-screen flex items-center justify-center bg-[#110b09] p-4">
+      <Card className="w-full max-w-[400px] border-none shadow-2xl rounded-[2.5rem] overflow-hidden luxury-card bg-[#1a0f0a] border-white/5">
+        <CardHeader className="bg-[#2a1811] text-[#F2E8D9] p-8 text-center relative overflow-hidden border-b border-white/5">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D48A5A]/10 to-transparent" />
           <div className="flex justify-center mb-4 relative z-10">
             <div className="relative w-20 h-20">
               <Image 
@@ -94,13 +93,13 @@ export default function LoginPage() {
               />
             </div>
           </div>
-          <CardTitle className="text-xl font-headline font-black relative z-10 text-white text-center">دخول فريق العمل</CardTitle>
-          <p className="text-white/60 text-[10px] mt-1 font-medium relative z-10 uppercase tracking-widest text-center">Diamond Administration</p>
+          <CardTitle className="text-xl font-headline font-black relative z-10 text-[#F2E8D9] text-center">دخول فريق العمل</CardTitle>
+          <p className="text-[#D48A5A] text-[10px] mt-1 font-bold relative z-10 uppercase tracking-widest text-center">Diamond Administration</p>
         </CardHeader>
         <CardContent className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 uppercase tracking-widest flex items-center gap-2 pr-1">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 uppercase tracking-widest flex items-center gap-2 pr-1">
                 <Mail className="h-3 w-3 text-[#D48A5A]" /> البريد الإلكتروني
               </label>
               <Input 
@@ -109,13 +108,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner text-left font-medium focus-visible:ring-1 focus-visible:ring-[#D48A5A]"
+                className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] placeholder:text-[#F2E8D9]/20 font-medium focus-visible:ring-[#D48A5A]"
                 dir="ltr"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-[#432419]/60 uppercase tracking-widest flex items-center gap-2 pr-1">
+              <label className="text-[11px] font-black text-[#F2E8D9]/60 uppercase tracking-widest flex items-center gap-2 pr-1">
                 <Lock className="h-3 w-3 text-[#D48A5A]" /> كلمة المرور
               </label>
               <Input 
@@ -124,7 +123,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 rounded-xl bg-[#432419]/5 border-none shadow-inner text-left focus-visible:ring-1 focus-visible:ring-[#D48A5A]"
+                className="h-12 rounded-xl bg-white/5 border-white/10 text-[#F2E8D9] placeholder:text-[#F2E8D9]/20 focus-visible:ring-[#D48A5A]"
                 dir="ltr"
               />
             </div>
@@ -132,7 +131,7 @@ export default function LoginPage() {
             <Button 
               type="submit"
               disabled={loading}
-              className="w-full h-14 bg-[#432419] hover:bg-[#D48A5A] text-white rounded-xl font-black text-base transition-all shadow-lg active:scale-95"
+              className="w-full h-14 bg-[#D48A5A] hover:bg-[#8B4E2E] text-[#1a0f0a] rounded-xl font-black text-base transition-all shadow-lg active:scale-95"
             >
               {loading ? "جاري التحقق..." : "تسجيل الدخول"}
             </Button>
@@ -142,7 +141,7 @@ export default function LoginPage() {
                 variant="ghost" 
                 type="button"
                 onClick={() => router.push("/menu")}
-                className="w-full text-[#8B4E2E] font-bold text-xs h-10 hover:bg-[#432419]/5"
+                className="w-full text-[#F2E8D9]/60 hover:text-[#F2E8D9] font-bold text-xs h-10 hover:bg-white/5"
               >
                 <ArrowLeft className="ml-2 h-3.5 w-3.5" /> العودة للقائمة
               </Button>
